@@ -50,7 +50,7 @@ c            acol_ptr(j), ... , acol_ptr(j+1) - 1.
 c         On exit acol_ptr is unchanged.
 c
 c       arow_ind is an integer array of dimension nnz.
-c         On entry arow_ind must contain row indices for the strict 
+c         On entry arow_ind must contain row indices for the strict
 c            lower triangular part of A in compressed column storage.
 c         On exit arow_ind is unchanged.
 c
@@ -72,7 +72,7 @@ c
 c       lrow_ind is an integer array of dimension nnz+n*p.
 c         On entry lrow_ind need not be specified.
 c         On exit lrow_ind contains row indices for the strict lower
-c            triangular part of L in compressed column storage. 
+c            triangular part of L in compressed column storage.
 c
 c       p is an integer variable.
 c         On entry p specifes the amount of memory available for the
@@ -99,7 +99,7 @@ c     Chih-Jen Lin and Jorge J. More'.
 c
 c     **********
       integer nbmax
-      parameter(nbmax=3)
+      parameter(nbmax=1)
       double precision alpham, nbfactor
       parameter(alpham=1.0d-3,nbfactor=512)
       double precision zero, one, two
@@ -109,7 +109,7 @@ c     **********
       double precision alphas
 
       external dicf
-      
+
 c     Compute the l2 norms of the columns of A.
 
       do i = 1, n
@@ -136,7 +136,7 @@ c     Compute the scaling matrix D.
          endif
       end do
 
-c     Determine a lower bound for the step. 
+c     Determine a lower bound for the step.
 
       if (alpha .le. zero) then
          alphas = alpham
@@ -147,17 +147,17 @@ c     Determine a lower bound for the step.
 c     Compute the initial shift.
 
       alpha = zero
-      do i = 1, n
-         if (adiag(i) .eq. zero) then
-            alpha = alphas
-         else
-            alpha = max(alpha,-adiag(i)*(wa2(i)**2))
-         end if
-      end do
-      if (alpha .gt. zero) alpha = max(alpha,alphas)
+C       do i = 1, n
+C          if (adiag(i) .eq. zero) then
+C             alpha = alphas
+C          else
+C             alpha = max(alpha,-adiag(i)*(wa2(i)**2))
+C          end if
+C       end do
+C       if (alpha .gt. zero) alpha = max(alpha,alphas)
 
-c     Search for an acceptable shift. During the search we decrease 
-c     the lower bound alphas until we determine a lower bound that 
+c     Search for an acceptable shift. During the search we decrease
+c     the lower bound alphas until we determine a lower bound that
 c     is not acceptable. We then increase the shift.
 c     The lower bound is decreased by nbfactor at most nbmax times.
 
@@ -218,7 +218,7 @@ c           Otherwise undo the scaling of L and exit.
       return
 
       end
- 
 
 
- 
+
+
