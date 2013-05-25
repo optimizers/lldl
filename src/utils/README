@@ -1,0 +1,14 @@
+
+The Makefile in the UTILS directory assumes that the ARCH environment
+variable has been set correctly. Installation has has been tested on
+linux, rs6000, solaris, irix, and alpha systems. On some systems the
+ARCH environment variable has been set to another name.  For example,
+on the rs6000 the ARCH environment variable is sometimes set to aix.
+
+If the Makefile in the UTILS directory does not work, you need to
+replace cputime.F by another function that measures cpu time on your
+system.
+
+Another option is to eliminate cputime and use the wallclock function
+supplied in this directory. This requires replacing cputime by
+wallclock in the driver.f file.

@@ -1,0 +1,47 @@
+
+
+           VERSIONS
+          
+Version 1.0
+
+  Released May 1998.
+
+Version 1.1
+
+  Released October 1998.
+
+  Fixes a bug in dicfs.f brought to our attention by Michael Ulbrich.
+  The search for a suitable shift alpha ended prematurely for small n.
+  In the example, n = 3. The termination criteria for the shift is now
+  independent of n.
+
+Version 1.2
+
+  Released February 1999.
+
+  This version includes the MATLAB interface.
+
+Version 1.3
+
+  Released February 2001.
+
+  Updates subroutine dsel2.f with the version of October 1999
+  where the length of x is now set to *. Version 1.2 gave correct 
+  results but also issued warnings if array bounds were checked.
+
+  The blas routines included with this release were also updated,
+  but in all cases, usage of machine-specific blas is recommended.
+
+  The main README file now specifically asks that the ARCH environment
+  variable be set, while the README file in the UTILS directory
+  provides system-dependent information.
+
+  The timing routines in the UTILS directory have also been updated.
+
+Version 1.4
+
+  Released April 2001.
+
+  Added subroutine dsel.f to the distribution since, as noted by
+  Krzysztof C. Kiwiel, this code is of independent interest in algorithms
+  for the continuous quadratic knapsack.

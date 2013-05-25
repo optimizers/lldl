@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# This script transforms a .F file into a .f file
+# Parameters for the preprocessor are accepted.
+
+arch=$ARCH
+
+file=`echo $1 | sed 's/.F//'`
+cp $file.F ${file}_${arch}.F  # OSX is case insensitive
+file=${file}_${arch}
+
+flags="-E -P -C";
+
+# The shift operator now makes "$@" contain all parameters after the first.
+
+shift
+
+architecture=`echo $arch | tr '[A-Z]' '[a-z]'`
+
+case $architecture in
+solaris)
+  fpp -fixed -P "$@" $file.F $file.f;
+
+  # Now replace those nasty continuation symbols that fpp introduces.
+
+  sed 's/     \* /     + /' $file.f > tmp;
+  mv tmp $file.f;
+  ;;
+rs6000)
+  cp $file.F $file.c;
+  cc $flags "$@" $file.c > $file.i;
+  sed 's/^#.*//' $file.i > $file.f;
+  rm $file.i; rm $file.c
+  ;;
+linux | osx)
+  gcc-4.3 $flags "$@" $file.F > $file.i;
+  mv $file.i $file.f;
+  ;;
+irix64)
+  cc $flags "$@" $file.F > $file.i;
+  sed 's/^#.*//' $file.i > $file.f;
+  rm $file.i;
+  ;;
+irix)
+  cc $flags "$@" $file.F > $file.i;
+  sed 's/^#.*//' $file.i > $file.f;
+  rm $file.i;
+  ;;
+alpha)
+  cc $flags "$@" $file.F > $file.i;
+  mv $file.i $file.f;
+  ;;
+*)
+  cc $flags $file.F > $file.i;
+  mv $file.i $file.f;
+  ;;
+esac
+
+
+
+

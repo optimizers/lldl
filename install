@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# MEX requires gcc/gfortran 4.3
+export ARCH=osx
+CC=gcc-4.3 FC=gfortran-4.3 make install
+cd matlab
+make matlab
+cd -
