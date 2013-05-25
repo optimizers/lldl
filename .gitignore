@@ -1,0 +1,6 @@
+*~
+*.o
+*.a
+*.mexmaci64
+cputime_osx.f
+icf.info
