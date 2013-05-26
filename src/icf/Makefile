@@ -5,18 +5,18 @@
 L_ARCH   = $(ARCH)
 LIB_NAME = d-$(L_ARCH).a
 
-OPTFLAGS = -O 
+OPTFLAGS = -g # -O
 
 AR = ar -rcv
 
 FILES = dicf.o   dpcg.o   dssyax.o   ihsort.o  srtdat2.o \
         dicfs.o  dsel.o   dsel2.o  dstrsol.o  insort.o
 
-CFLAGS = $(OPTFLAGS) 
+CFLAGS = $(OPTFLAGS)
 FFLAGS = $(OPTFLAGS)
 
-icf: $(FILES) 
-	$(AR) $(LIB_NAME) $(FILES)  
+icf: $(FILES)
+	$(AR) $(LIB_NAME) $(FILES)
 
 clean:
 	- rm -f *.o

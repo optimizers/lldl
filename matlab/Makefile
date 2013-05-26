@@ -21,7 +21,7 @@ icf:
 	cd ../src/icf; make
 
 CMEX = /Applications/Matlab/MATLAB_R2012a.app/bin/mex
-CMEXFLAGS = -DARCH=$(ARCH)
+CMEXFLAGS = -DARCH=$(ARCH) -largeArrayDims -DMXDEBUG -g
 
 # Path for mex.h
 
