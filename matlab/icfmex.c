@@ -84,9 +84,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
    /* Allocate working arrays */
 
-   if (( (w1 = (double*) calloc(n, sizeof(double))) == (double *)NULL ) ||
-       ( (w2 = (double*) calloc(n, sizeof(double))) == (double *)NULL ) ||
-       ( (iw = (int*) calloc(3*n, sizeof(int))) == (int *)NULL )) {
+   if (( (w1 = (double*) mxCalloc(n, sizeof(double))) == (double *)NULL ) ||
+       ( (w2 = (double*) mxCalloc(n, sizeof(double))) == (double *)NULL ) ||
+       ( (iw = (int*) mxCalloc(3*n, sizeof(int))) == (int *)NULL )) {
      mexErrMsgTxt("Not enough memory\n") ;
    }
 
@@ -96,7 +96,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
    for (i = 0; i <= n; i++)  acol_ptr[i] = acol_ptr[i] + 1 ;
 
 #ifdef MXDEBUG
-   mexPrintf("After conversion for Fortran:\n");
+   mexPrintf("After conversion to Fortran indexing:\n");
    mexPrintf("arow_ind = [ ");
    for (i=0; i<5; i++) mexPrintf("%d ", (int) arow_ind[i]);
    mexPrintf(" ... ]\n");
@@ -163,9 +163,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
    /* Free memory */
 
-   free(w1) ;
-   free(w2) ;
-   free(iw) ;
+   mxFree((void*) w1) ;
+   mxFree((void*) w2) ;
+   mxFree((void*) iw) ;
 } /* mexFunction */
 
 
