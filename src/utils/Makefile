@@ -5,10 +5,6 @@
 L_ARCH   = $(ARCH)
 LIB_NAME = d-$(L_ARCH).a
 
-OPTFLAGS = -O
-
-CFLAGS    = $(OPTFLAGS) -D$(ARCH)
-FFLAGS    = $(OPTFLAGS)
 CPPFLAGS  = -E -C -D$(ARCH)
 
 AR = ar -rcv
@@ -24,7 +20,7 @@ clean:
 .SUFFIXES: .c .f .F
 
 .c.o:
-	$(CC) $(CFLAGS) -c $*.c
+	$(CC) $(CFLAGS) -D$(ARCH) -c $*.c
 .f.o:
 	$(FC) $(FFLAGS) -c $*.f
 #.F.o:
