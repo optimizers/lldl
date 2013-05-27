@@ -59,15 +59,17 @@ extern "C" {
       /* Right hand side: input args */
 
       /* Check data type of input argument  */
-      if (!(mxIsDouble(prhs[0]))){
+      if (!(mxIsDouble(prhs[0])))
          mexErrMsgIdAndTxt("MATLAB:icfmex:inputNotDouble",
                "Input argument 0 must be of type double.");
-      }
 
-      if (mxGetNumberOfDimensions(prhs[0]) != 2){
+      if (!(mxIsSparse(prhs[0])))
+        mexErrMsgIdAndTxt("MATLAB:icfmex:inputNotSparse",
+                      "Input argument 0 must be sparse.");
+
+      if (mxGetNumberOfDimensions(prhs[0]) != 2)
          mexErrMsgIdAndTxt("MATLAB:icfmex:inputNot2D",
           "Input argument 0 must be two dimensional.");
-      }
 
       n = (int)mxGetN(prhs[0]);
 
@@ -80,10 +82,9 @@ extern "C" {
       acol_ptr = mxGetJc(prhs[0]);           /* Length n+1 (0 ... n)     */
       nnz = (int)acol_ptr[n];
 
-      if (!(mxIsDouble(prhs[1]))){
+      if (!(mxIsDouble(prhs[1])))
          mexErrMsgIdAndTxt("MATLAB:icfmex:inputNotDouble",
                "Input argument 1 must be of type double.");
-      }
 
       adiag = (double*)mxGetData(prhs[1]);   /* Length n   (0 ... n-1)   */
 
