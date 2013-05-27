@@ -1,8 +1,15 @@
 #!/bin/bash
 
+top=$PWD
+
 # MEX requires gcc/gfortran 4.3
 export ARCH=osx
-CC=gcc-4.3 FC=gfortran-4.3 make install
-cd matlab
-make matlab
-cd -
+make install \
+    CC=gcc-4.3 FC=gfortran-4.3 \
+    CFLAGS='-g -fno-second-underscore -flat_namespace' \
+    FFLAGS='-g -fno-second-underscore -flat_namespace -ffixed-form'
+[[ $? != 0 ]] && exit $?
+
+cd $top/matlab
+CC=gcc-4.3 FC=gfortran-4.3 make matlab
+cd $top
