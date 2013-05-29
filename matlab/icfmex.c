@@ -14,6 +14,8 @@ The calling syntax :
 #include "mex.h"
 #include "matrix.h"
 
+#define ICFS_MAX(a,b) ((a) > (b) ? (a) : (b))
+
 /* For versions of the Matlab API prior to 7.3 */
 #if (MX_API_VER < 0x07030000)
 typedef int mwSize;
@@ -90,10 +92,46 @@ extern "C" {
 
       p = (int)mxGetScalar(prhs[2]);
 
+  #ifdef MXDEBUG
+      mexPrintf("Calling icfmex with n=%d, nnz=%d, p=%d\n", n, nnz, p);
+      mexPrintf("%d input args and %d output args\n", nrhs, nlhs);
+      if (nnz > 3) {
+        mexPrintf("arow_ind = [ ");
+        for (i=0; i<3; i++) mexPrintf("%d ", (int)arow_ind[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%d ", (int)arow_ind[nnz-1-i]);
+        mexPrintf("]\n");
+      }
+
+      if (n > 3) {
+        mexPrintf("acol_ptr = [ ");
+        for (i=0; i<3; i++) mexPrintf("%d ", (int)acol_ptr[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%d ", (int)acol_ptr[n-i]);
+        mexPrintf("]\n");
+      }
+
+      if (n > 3) {
+        mexPrintf("adiag = [ ");
+        for (i=0; i<3; i++) mexPrintf("%8.1e ", adiag[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%8.1e ", adiag[n-1-i]);
+        mexPrintf("]\n");
+      }
+
+      if (nnz > 3) {
+        mexPrintf("a = [ ");
+        for (i=0; i<3; i++) mexPrintf("%8.1e ", a[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%8.1e ", a[nnz-1-i]);
+        mexPrintf("]\n");
+      }
+   #endif
+
       /* Because mwIndex differs from int, we are required to COPY the
          input matrix into int* arrays. Isn't Matlab the tool?
          Anyways. Account for Fortran indexing. */
-      if (! (arow_ind_int = (int *)mxCalloc(nnz, sizeof(int))))
+      if (! (arow_ind_int = (int *)mxCalloc(ICFS_MAX(nnz,1), sizeof(int))))
          mexErrMsgTxt("Not enough memory for arow_ind");
       if (! (acol_ptr_int = (int *)mxCalloc(n+1, sizeof(int))))
          mexErrMsgTxt("Not enough memory for acol_ptr");
@@ -110,44 +148,17 @@ extern "C" {
          acol_ptr_int[i] = (int)acol_ptr[i] + 1;
       }
 
-   #ifdef MXDEBUG
-      mexPrintf("Calling icfmex with n=%d, nnz=%d, p=%d\n", n, nnz, p);
-      mexPrintf("%d input args and %d output args\n", nrhs, nlhs);
-      mexPrintf("arow_ind = [ ");
-      for (i=0; i<3; i++) mexPrintf("%d ", (int)arow_ind[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%d ", (int)arow_ind[nnz-1-i]);
-      mexPrintf("]\n");
-
-      mexPrintf("acol_ptr = [ ");
-      for (i=0; i<3; i++) mexPrintf("%d ", (int)acol_ptr[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%d ", (int)acol_ptr[n-i]);
-      mexPrintf("]\n");
-
-      mexPrintf("adiag = [ ");
-      for (i=0; i<3; i++) mexPrintf("%8.1e ", adiag[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%8.1e ", adiag[n-1-i]);
-      mexPrintf("]\n");
-
-      mexPrintf("a = [ ");
-      for (i=0; i<3; i++) mexPrintf("%8.1e ", a[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%8.1e ", a[nnz-1-i]);
-      mexPrintf("]\n");
-   #endif
-
       /* Left-hand side: output args */
 
-      plhs[0] = mxCreateSparse((mwSize)n, (mwSize)n, (mwSize)(nnz+n*p), mxREAL);
+      plhs[0] = mxCreateSparse((mwSize)n, (mwSize)n,
+                               (mwSize)ICFS_MAX(nnz+n*p,1), mxREAL);
       l = (double *)mxGetPr(plhs[0]);
       lrow_ind = mxGetIr(plhs[0]);
       lcol_ptr = mxGetJc(plhs[0]);
 
       /* Allocate int* arrays to pass to Fortran. These will be copied
          into lrow_ind and lcol_ptr later. */
-      if (! (lrow_ind_int = (int *)mxCalloc(nnz+n*p, sizeof(int))))
+      if (! (lrow_ind_int = (int *)mxCalloc(ICFS_MAX(nnz+n*p,1), sizeof(int))))
          mexErrMsgTxt("Not enough memory for lrow_ind");
       if (! (lcol_ptr_int = (int *)mxCalloc(n+1, sizeof(int))))
          mexErrMsgTxt("Not enough memory for lcol_ptr");
@@ -164,17 +175,21 @@ extern "C" {
 
    #ifdef MXDEBUG
       mexPrintf("After conversion to Fortran indexing:\n");
-      mexPrintf("arow_ind = [ ");
-      for (i=0; i<3; i++) mexPrintf("%d ", arow_ind_int[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%d ", arow_ind_int[nnz-1-i]);
-      mexPrintf("]\n");
+      if (nnz > 3) {
+        mexPrintf("arow_ind = [ ");
+        for (i=0; i<3; i++) mexPrintf("%d ", arow_ind_int[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%d ", arow_ind_int[nnz-1-i]);
+        mexPrintf("]\n");
+      }
 
-      mexPrintf("acol_ptr = [ ");
-      for (i=0; i<3; i++) mexPrintf("%d ", acol_ptr_int[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%d ", acol_ptr_int[n-i]);
-      mexPrintf("]\n");
+      if (n > 3) {
+        mexPrintf("acol_ptr = [ ");
+        for (i=0; i<3; i++) mexPrintf("%d ", acol_ptr_int[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%d ", acol_ptr_int[n-i]);
+        mexPrintf("]\n");
+      }
    #endif
 
       /* Call icf fortran subroutine */
@@ -185,37 +200,46 @@ extern "C" {
 
       dicfs_(&n, &nnz,
              a, adiag, acol_ptr_int, arow_ind_int,
-   	       l, ldiag, lcol_ptr_int, lrow_ind_int,
+   	         l, ldiag, lcol_ptr_int, lrow_ind_int,
              &p, &alpha,
-   	       iw, w1, w2);
+   	         iw, w1, w2);
 
       int nnzl = lcol_ptr_int[n] - 1;  /* -1 accounts for 1-based indexing */
 
    #ifdef MXDEBUG
       mexPrintf("Returning from dicfs with alpha=%7.1e, nnzl=%d\n", alpha, nnzl);
-      mexPrintf("lrow_ind = [ ");
-      for (i=0; i<3; i++) mexPrintf("%d ", lrow_ind_int[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%d ", lrow_ind_int[nnzl-1-i]);
-      mexPrintf("]\n");
 
-      mexPrintf("lcol_ptr = [ ");
-      for (i=0; i<3; i++) mexPrintf("%d ", lcol_ptr_int[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%d ", lcol_ptr_int[n-i]);
-      mexPrintf("]\n");
+      if (nnzl > 3) {
+        mexPrintf("lrow_ind = [ ");
+        for (i=0; i<3; i++) mexPrintf("%d ", lrow_ind_int[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%d ", lrow_ind_int[nnzl-1-i]);
+        mexPrintf("]\n");
+      }
 
-      mexPrintf("ldiag = [ ");
-      for (i=0; i<3; i++) mexPrintf("%8.1e ", ldiag[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%8.1e ", ldiag[n-1-i]);
-      mexPrintf("]\n");
+      if (n > 3) {
+        mexPrintf("lcol_ptr = [ ");
+        for (i=0; i<3; i++) mexPrintf("%d ", lcol_ptr_int[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%d ", lcol_ptr_int[n-i]);
+        mexPrintf("]\n");
+      }
 
-      mexPrintf("l = [ ");
-      for (i=0; i<3; i++) mexPrintf("%8.1e ", l[i]);
-      mexPrintf(" ... ");
-      for (i=0; i<3; i++) mexPrintf("%8.1e ", l[nnzl-1-i]);
-      mexPrintf("]\n");
+      if (n > 3) {
+        mexPrintf("ldiag = [ ");
+        for (i=0; i<3; i++) mexPrintf("%8.1e ", ldiag[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%8.1e ", ldiag[n-1-i]);
+        mexPrintf("]\n");
+      }
+
+      if (nnzl > 3) {
+        mexPrintf("l = [ ");
+        for (i=0; i<3; i++) mexPrintf("%8.1e ", l[i]);
+        mexPrintf(" ... ");
+        for (i=0; i<3; i++) mexPrintf("%8.1e ", l[nnzl-1-i]);
+        mexPrintf("]\n");
+      }
    #endif
 
       /* Sort each segment of lrow_ind in ascending order and sync l. */
