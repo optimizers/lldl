@@ -2,14 +2,24 @@
 
 top=$PWD
 
-# MEX requires gcc/gfortran 4.3
-export ARCH=osx
-make install \
-    CC=gcc-4.3 FC=gfortran-4.3 \
-    CFLAGS='-g -fno-second-underscore -flat_namespace' \
-    FFLAGS='-g -fno-second-underscore -flat_namespace -ffixed-form'
+# Compiler settings.
+[[ ${ARCH+set} == 'set' ]] || export ARCH=osx
+[[ ${CC+set} == 'set' ]] || CC=gcc-4.3
+[[ ${CFLAGS+set} == 'set' ]] || CFLAGS='-g -fno-second-underscore -flat_namespace'
+[[ ${FC+set} == 'set' ]] || FC=gfortran-4.3
+[[ ${FFLAGS+set} == 'set' ]] || FFLAGS='-g -fno-second-underscore -flat_namespace -ffixed-form'
+
+# Build main library.
+make install CC="$CC" FC="$FC" CFLAGS="$CFLAGS" FFLAGS="$FFLAGS"
 [[ $? != 0 ]] && exit $?
 
+# Build Matlab interface. MEX requires gcc/gfortran 4.3
+CCVER=`$CC --version | head -1 | awk '{print $NF}' | cut -c 1-3`
+FCVER=`$FC --version | head -1 | awk '{print $NF}' | cut -c 1-3`
+if [[ $CCVER != '4.3' || $FCVER != '4.3' ]]; then
+    echo "Matlab requires gcc/gfortran 4.3"
+    exit 1
+fi
 cd $top/matlab
-CC=gcc-4.3 FC=gfortran-4.3 make matlab
+CC="$CC" FC="$CC" make matlab
 cd $top
