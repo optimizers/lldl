@@ -127,7 +127,7 @@ c     Make room for L by moving A to the last n*p positions in a.
          a(np+j) = a(j)
       end do
 
-c     Compute the incomplete Cholesky factorization.
+c     Compute the incomplete LDL factorization.
 
       isj = col_ptr(1)
       col_ptr(1) = 1
@@ -146,15 +146,12 @@ c        of the j-th column of A are a(isj) and a(iej).
             indf(i) = 1
          end do
 
-c        Exit if the current pivot is not positive.
+c        Exit if the current pivot is zero.
 
-c        if (diag(j) .le. zero) then
-c           info = -j
-c           return
-c        end if
-
-c        Leave diag(j) unchanged
-c        diag(j) = sqrt(diag(j))
+         if (diag(j) .eq. zero) then
+            info = -j
+            return
+         end if
 
 c        Update column j using the previous columns.
 
@@ -176,28 +173,34 @@ c           Update indf and list.
                list(k) = list(row_ind(isk))
                list(row_ind(isk)) = k
             endif
-            k = newk
 
-c           Compute the update a(i,i) <- a(i,j) - l(i,k)*l(j,k).
+c           Compute the update a(i,j) <- a(i,j) - d(k)*l(i,k)*l(j,k).
 c           In this loop we pick up l(i,k) for k < j and i > j.
 
             do ip = isk, iek
                i = row_ind(ip)
                if (indf(i) .ne. 0) then
-                  w(i) = w(i) - lval*a(ip)
+c                 w(i) = l(i,j), lval = l(j,k), a(ip) = l(i,k)
+                  w(i) = w(i) - diag(k)*lval*a(ip)
                else
                   indf(i) = 1
                   nlj = nlj + 1
                   indr(nlj) = i
-                  w(i) = - lval*a(ip)
+                  w(i) = - diag(k)*lval*a(ip)
                end if
             end do
+
+c           Should this just say k = list(k) ?
+            k = newk
          end do
 
 c        Compute the j-th column of L.
 
          do k = 1, nlj
             w(indr(k)) = w(indr(k))/diag(j)
+
+c           Shouldn't this be here???
+            diag(indr(k)) = diag(indr(k)) - diag(j) * w(indr(k))**2
          end do
 
 c        Set mlj to the number of nonzeros to be retained.
@@ -228,17 +231,18 @@ c        Store the largest elements in L. The first and last elements
 c        of the j-th column of L are a(newisj) and a(newiej).
 
          newisj = col_ptr(j)
-         newiej = newisj + mlj -1
+         newiej = newisj + mlj - 1
          do k = newisj, newiej
             a(k) = w(indr(k-newisj+kth))
             row_ind(k) = indr(k-newisj+kth)
          end do
 
 c        Update the diagonal elements.
+c        Is this at the right place?
 
-         do k = kth, nlj
-            diag(indr(k)) = diag(indr(k)) - diag(j) * w(indr(k))**2
-         end do
+C          do k = kth, nlj
+C             diag(indr(k)) = diag(indr(k)) - diag(j) * w(indr(k))**2
+C          end do
 
 c        Update indf and list for the j-th column.
 
