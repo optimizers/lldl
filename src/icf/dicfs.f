@@ -138,11 +138,11 @@ c     Compute the scaling matrix D.
 
 c     Determine a lower bound for the step.
 
-      if (alpha .le. zero) then
-         alphas = alpham
-      else
-         alphas = alpha
-      end if
+C       if (alpha .le. zero) then
+C          alphas = alpham
+C       else
+C          alphas = alpha
+C       end if
 
 c     Compute the initial shift.
 
@@ -161,8 +161,8 @@ c     the lower bound alphas until we determine a lower bound that
 c     is not acceptable. We then increase the shift.
 c     The lower bound is decreased by nbfactor at most nbmax times.
 
-      nb = 1
-      do while (1 .eq. 1)
+C       nb = 1
+C       do while (1 .eq. 1)
 
 c        Copy the sparsity structure of A into L.
 
@@ -176,11 +176,13 @@ c        Copy the sparsity structure of A into L.
 c        Scale A and store in the lower triangular matrix L.
 
          do j = 1, n
-            ldiag(j) = adiag(j)*(wa2(j)**2) + alpha
+c            ldiag(j) = adiag(j)*(wa2(j)**2) + alpha
+            ldiag(j) = adiag(j)
          end do
          do j = 1, n
             do i = acol_ptr(j), acol_ptr(j+1)-1
-               l(i) = a(i)*wa2(j)*wa2(arow_ind(i))
+C                l(i) = a(i)*wa2(j)*wa2(arow_ind(i))
+               l(i) = a(i)
             end do
          end do
 
@@ -192,33 +194,29 @@ c        Attempt an incomplete factorization.
 c        If the factorization exists, then test for termination.
 c        Otherwise increment the shift.
 
-         if (info .ge. 0) then
+C          if (info .ge. 0) then
 
-c           If the shift is at the lower bound, reduce the shift.
-c           Otherwise undo the scaling of L and exit.
+C c           If the shift is at the lower bound, reduce the shift.
+C c           Otherwise undo the scaling of L and exit.
 
-            if (alpha .eq. alphas .and. nb .lt. nbmax) then
-               alphas = alphas/nbfactor
-               alpha = alphas
-               nb = nb + 1
-            else
-               do i = 1, n
-                  ldiag(i) = ldiag(i)/wa2(i)
-               end do
-               do j = 1, lcol_ptr(n+1)-1
-                  l(j) = l(j)/wa2(lrow_ind(j))
-               end do
+C             if (alpha .eq. alphas .and. nb .lt. nbmax) then
+C                alphas = alphas/nbfactor
+C                alpha = alphas
+C                nb = nb + 1
+C             else
+C                do i = 1, n
+C                   ldiag(i) = ldiag(i)/wa2(i)
+C                end do
+C                do j = 1, lcol_ptr(n+1)-1
+C                   l(j) = l(j)/wa2(lrow_ind(j))
+C                end do
                return
-            end if
-         else
-            alpha = max(two*alpha,alphas)
-         end if
-      end do
+C             end if
+C          else
+C             alpha = max(two*alpha,alphas)
+C          end if
+C       end do
 
-      return
+C       return
 
       end
-
-
-
-
