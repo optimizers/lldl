@@ -33,7 +33,7 @@ rs6000)
   rm $file.i; rm $file.c
   ;;
 linux | osx)
-  gcc-4.3 $flags "$@" $file.F > $file.i;
+  gfortran $flags "$@" $file.F > $file.i;
   mv $file.i $file.f;
   ;;
 irix64)
