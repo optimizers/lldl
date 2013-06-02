@@ -34,8 +34,8 @@ Here is an example call:
     n = 6; m = 4; E = rand(m,n);
     A = [(n+m+1)*eye(n) E' ; E -(n+m+1)*eye(m)];
     Adiag = full(diag(A)); lA = sparse(tril(A,-1)); p=1;
-    [L, Ldiag] = icfmex(lA, Adiag, p);
-    L = L + speye(size(L,1));
+    [L, D] = icfmex(lA, Adiag, p);
+    L = L + speye(size(L));
 
 ## Python Interface
 
