@@ -1,5 +1,5 @@
       subroutine dicfs(n,nnz,a,adiag,acol_ptr,arow_ind,
-     +                 l,ldiag,lcol_ptr,lrow_ind,
+     +                 l,d,lcol_ptr,lrow_ind,
      +                 p,iwa,wa1,wa2)
       integer n, nnz, p
       integer acol_ptr(n+1), arow_ind(nnz)
@@ -7,7 +7,7 @@
       integer iwa(3*n)
       double precision alpha
       double precision wa1(n), wa2(n)
-      double precision a(nnz), adiag(n), l(nnz+n*p), ldiag(n)
+      double precision a(nnz), adiag(n), l(nnz+n*p), d(n)
 c     *********
 c
 c     Subroutine dicfs
@@ -18,7 +18,7 @@ c
 c     The subroutine statement is
 c
 c       subroutine dicfs(n,nnz,a,adiag,acol_ptr,arow_ind,
-c                        l,ldiag,lcol_ptr,lrow_ind,
+c                        l,d,lcol_ptr,lrow_ind,
 c                        p,iwa,wa1,wa2)
 c
 c     where
@@ -57,9 +57,9 @@ c         On entry l need not be specified.
 c         On exit l contains the strict lower triangular part
 c            of L in compressed column storage.
 c
-c       ldiag is a double precision array of dimension n.
-c         On entry ldiag need not be specified.
-c         On exit ldiag contains the diagonal elements of L.
+c       d is a double precision array of dimension n.
+c         On entry d need not be specified.
+c         On exit d contains the diagonal elements of L.
 c
 c       lcol_ptr is an integer array of dimension n + 1.
 c         On entry lcol_ptr need not be specified.
@@ -137,7 +137,7 @@ c     Copy the sparsity structure of A into L.
 c     Scale A and store in the lower triangular matrix L.
 
       do j = 1, n
-         ldiag(j) = adiag(j)*(wa2(j)**2)
+         d(j) = adiag(j)*(wa2(j)**2)
       end do
       do j = 1, n
          do i = acol_ptr(j), acol_ptr(j+1)-1
@@ -147,13 +147,13 @@ c     Scale A and store in the lower triangular matrix L.
 
 c     Compute the incomplete factorization.
 
-      call dicf(n,nnz,l,ldiag,lcol_ptr,lrow_ind,p,info,
+      call dicf(n,nnz,l,d,lcol_ptr,lrow_ind,p,info,
      +          iwa(1),iwa(n+1),iwa(2*n+1),wa1)
 
 c     Undo the scaling.
 
       do i = 1, n
-         ldiag(i) = ldiag(i) / (wa2(i)**2)
+         d(i) = d(i) / (wa2(i)**2)
       end do
       do j = 1, n
          do i = lcol_ptr(j), lcol_ptr(j+1)-1
