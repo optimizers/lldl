@@ -137,13 +137,11 @@ c     Copy the sparsity structure of A into L.
 c     Scale A and store in the lower triangular matrix L.
 
       do j = 1, n
-c        ldiag(j) = adiag(j)*(wa2(j)**2) + alpha
-         ldiag(j) = adiag(j)
+         ldiag(j) = adiag(j)*(wa2(j)**2)
       end do
       do j = 1, n
          do i = acol_ptr(j), acol_ptr(j+1)-1
-C           l(i) = a(i)*wa2(j)*wa2(arow_ind(i))
-            l(i) = a(i)
+            l(i) = a(i)*wa2(j)*wa2(arow_ind(i))
          end do
       end do
 
@@ -154,12 +152,14 @@ c     Compute the incomplete factorization.
 
 c     Undo the scaling.
 
-C     do i = 1, n
-C         ldiag(i) = ldiag(i)/wa2(i)
-C     end do
-C     do j = 1, lcol_ptr(n+1)-1
-C         l(j) = l(j)/wa2(lrow_ind(j))
-C     end do
+      do i = 1, n
+         ldiag(i) = ldiag(i) / (wa2(i)**2)
+      end do
+      do j = 1, n
+         do i = lcol_ptr(j), lcol_ptr(j+1)-1
+            l(i) = l(i) * wa2(j) / wa2(lrow_ind(i))
+         end do
+      end do
 
       return
 
