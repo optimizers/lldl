@@ -20,12 +20,12 @@ blas:
 icf:
 	cd ../src/icf; make
 
-CMEX = /Applications/Matlab/MATLAB_R2012a.app/bin/mex
-CMEXFLAGS = -DARCH=$(ARCH)
+CMEX = $(MATLABPATH)/bin/mex
+CMEXFLAGS = -DARCH=$(ARCH) -largeArrayDims -g #-DMXDEBUG
 
 # Path for mex.h
 
-MINCLUDE = /Applications/Matlab/MATLAB_R2012a.app/extern/include
+MINCLUDE = $(MATLABPATH)/extern/include
 # MINCLUDE = /software/aix-4/com/packages/matlab-5.2/extern/include
 
 matlab: icfmex cgmex
