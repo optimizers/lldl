@@ -1,6 +1,31 @@
 #!/bin/bash
 
+display_help() {
+	echo "`basename $0` [--help] [--skip-matlab-check]"
+	echo "The following environment variables may be set to influence"
+	echo "the behavior of the install procedure:"
+	echo "  CC           C compiler executable"
+	echo "  FC           Fortran compiler executable"
+	echo "  CFLAGS       C compiler flags"
+	echo "  FFLAGS       Fortran compiler flags"
+	echo "  MATLABPATH   Path to Matlab's bin and extern subdirs"
+}
+
 top=$PWD
+
+skip_matlab_check=0
+for opt in "$@"
+do
+    case $opt in
+        --skip-matlab-check)
+            skip_matlab_check=1
+            ;;
+        -h|--help)
+			display_help
+            exit 0
+            ;;
+    esac
+done
 
 # Compiler settings.
 [[ ${ARCH+set} == 'set' ]] || export ARCH=osx
@@ -14,12 +39,15 @@ make install CC="$CC" FC="$FC" CFLAGS="$CFLAGS" FFLAGS="$FFLAGS"
 [[ $? != 0 ]] && exit $?
 
 # Build Matlab interface. MEX requires gcc/gfortran 4.3
-CCVER=`$CC --version | head -1 | awk '{print $NF}' | cut -c 1-3`
-FCVER=`$FC --version | head -1 | awk '{print $NF}' | cut -c 1-3`
-if [[ $CCVER != '4.3' || $FCVER != '4.3' ]]; then
-    echo "Matlab requires gcc/gfortran 4.3"
-    exit 1
+if [[ ! $skip_matlab_check ]]; then
+    CCVER=`$CC --version | head -1 | awk '{print $NF}' | cut -c 1-3`
+    FCVER=`$FC --version | head -1 | awk '{print $NF}' | cut -c 1-3`
+    if [[ $CCVER != '4.3' || $FCVER != '4.3' ]]; then
+        echo "Matlab requires gcc/gfortran 4.3"
+        exit 1
+    fi
 fi
 cd $top/matlab
-CC="$CC" FC="$CC" make matlab
+[[ ${MATLABPATH+set} == 'set' ]] || MATLABPATH='/Applications/Matlab/MATLAB_R2010b.app'
+CC="$CC" FC="$CC" MATLABPATH="$MATLABPATH" make matlab
 cd $top
