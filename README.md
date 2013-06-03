@@ -22,24 +22,34 @@ You can use non-default compilers and compiler flags by passing options to the `
 
 ## Matlab Interface
 
+You can specify the location of Matlab's `bin` and `extern` subdirectories using the `MATLABPATH` variable:
+
+    MATLABPATH=/Applications/Matlab/MATLAB_R2012a.app ./install
+
 The original Matlab interface has been fixed and modernized. The Mathworks [only support version 4.3 gfortran](http://www.mathworks.com/support/compilers/R2013a/index.html?sec=maci64) on OSX and Linux. On Linux, `gcc-4.3` should be found in your package manager. On OSX, I recommend using [Homebrew](http://mxcl.github.io/homebrew). Once Homebrew is installed, `gcc-4.3`, including the Fortran compiler, may be installed using
 
     brew tap homebrew/versions
     brew install gcc43 --enable-fortran --enable-profiled-build
 
-The compiler executables installed by the above commands are those used by default in LLDL's `install` script.
+The compiler executables installed by the above commands are those used by default in LLDL's `install` script. If you know that your compilers will produce valid MEX files (it is the case for `gcc-4.2` and `gfortran-4.2` on OSX 10.6.8), then:
 
-Here is an example call:
+    ./install --skip-matlab-check
+
+Here is an example Matlab session:
 
     n = 6; m = 4; E = rand(m,n);
     A = [(n+m+1)*eye(n) E' ; E -(n+m+1)*eye(m)];
     Adiag = full(diag(A)); lA = sparse(tril(A,-1)); p=1;
     [L, D] = icfmex(lA, Adiag, p);
-    L = L + speye(size(L));
+    L = L + speye(size(L));  % Diagonal was left out of L.
 
 ## Python Interface
 
 A Python interface is included as part of [NLPy](https://github.com/dpo/nlpy).
+
+## Trouble / Questions / Bugs
+
+Search existing [issues](https://github.com/optimizers/lldl/issues). If that does not answer your question, please open a [new issue](https://github.com/optimizers/lldl/issues/new).
 
 ## Notes
 
