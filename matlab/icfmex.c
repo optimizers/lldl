@@ -34,8 +34,7 @@ extern "C" {
   void dicfs_(int *n, int *nnz,
               double *a, double *adiag, int *acol_ptr, int *arow_ind,
               double *l, double *ldiag, int *lcol_ptr, int *lrow_ind,
-              int *p, double *alpha,
-              int *iw, double *w1, double *w2);
+              int *p, int *iw, double *w1, double *w2);
   void quicksort_icfs(int numbers[], double values[], int low, int up);
   void print_int_array(const char *name, int *array, int len,
                        const char *fmt);
@@ -61,7 +60,6 @@ extern "C" {
       /* Local variables */
 
       int i = 0, nnz = 0;
-      double alpha = 0.0;
 
       /* Right hand side: input args */
 
@@ -160,13 +158,12 @@ extern "C" {
       dicfs_(&n, &nnz,
              a, adiag, acol_ptr_int, arow_ind_int,
    	         l, ldiag, lcol_ptr_int, lrow_ind_int,
-             &p, &alpha,
-   	         iw, w1, w2);
+             &p, iw, w1, w2);
 
       int nnzl = lcol_ptr_int[n] - 1;  /* -1 accounts for 1-based indexing */
 
    #ifdef MXDEBUG
-      mexPrintf("Returning from dicfs with alpha=%7.1e, nnzl=%d\n", alpha, nnzl);
+      mexPrintf("Returning from dicfs with nnzl=%d\n", nnzl);
       print_int_array("lrow_ind", lrow_ind_int, nnzl, "%d ");
       print_int_array("lcol_ptr", lcol_ptr_int, n+1, "%d ");
       print_double_array("ldiag", ldiag, n, "%8.1e ");

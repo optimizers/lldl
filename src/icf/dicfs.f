@@ -1,6 +1,6 @@
       subroutine dicfs(n,nnz,a,adiag,acol_ptr,arow_ind,
      +                 l,ldiag,lcol_ptr,lrow_ind,
-     +                 p,alpha,iwa,wa1,wa2)
+     +                 p,iwa,wa1,wa2)
       integer n, nnz, p
       integer acol_ptr(n+1), arow_ind(nnz)
       integer lcol_ptr(n+1), lrow_ind(nnz+n*p)
@@ -13,15 +13,13 @@ c
 c     Subroutine dicfs
 c
 c     Given a symmetric matrix A in compressed column storage, this
-c     subroutine computes an incomplete Cholesky factor of A + alpha*D,
-c     where alpha is a shift and D is the diagonal matrix with entries
-c     set to the l2 norms of the columns of A.
+c     subroutine computes an incomplete LDL factorization of A.
 c
 c     The subroutine statement is
 c
 c       subroutine dicfs(n,nnz,a,adiag,acol_ptr,arow_ind,
 c                        l,ldiag,lcol_ptr,lrow_ind,
-c                        p,alpha,iwa,wa1,wa2)
+c                        p,iwa,wa1,wa2)
 c
 c     where
 c
@@ -79,10 +77,6 @@ c         On entry p specifes the amount of memory available for the
 c            incomplete Cholesky factorization.
 c         On exit p is unchanged.
 c
-c       alpha is a double precision variable.
-c         On entry alpha is the initial guess of the shift.
-c         On exit alpha is final shift
-c
 c       iwa is an integer work array of dimesnion 3*n.
 c
 c       wa1 is a double precision work array of dimension n.
@@ -98,15 +92,10 @@ c     Argonne National Laboratory.
 c     Chih-Jen Lin and Jorge J. More'.
 c
 c     **********
-      integer nbmax
-      parameter(nbmax=1)
-      double precision alpham, nbfactor
-      parameter(alpham=1.0d-3,nbfactor=512)
-      double precision zero, one, two
-      parameter(zero=0.0d0,one=1.0d0,two=2.0d0)
+      double precision zero, one
+      parameter(zero=0.0d0,one=1.0d0)
 
-      integer i, info, j, k, nb
-      double precision alphas
+      integer i, info, j, k
 
       external dicf
 
@@ -136,87 +125,42 @@ c     Compute the scaling matrix D.
          endif
       end do
 
-c     Determine a lower bound for the step.
+c     Copy the sparsity structure of A into L.
 
-C       if (alpha .le. zero) then
-C          alphas = alpham
-C       else
-C          alphas = alpha
-C       end if
+      do i = 1, n+1
+         lcol_ptr(i) = acol_ptr(i)
+      end do
+      do i = 1, nnz
+         lrow_ind(i) = arow_ind(i)
+      end do
 
-c     Compute the initial shift.
+c     Scale A and store in the lower triangular matrix L.
 
-      alpha = zero
-C       do i = 1, n
-C          if (adiag(i) .eq. zero) then
-C             alpha = alphas
-C          else
-C             alpha = max(alpha,-adiag(i)*(wa2(i)**2))
-C          end if
-C       end do
-C       if (alpha .gt. zero) alpha = max(alpha,alphas)
-
-c     Search for an acceptable shift. During the search we decrease
-c     the lower bound alphas until we determine a lower bound that
-c     is not acceptable. We then increase the shift.
-c     The lower bound is decreased by nbfactor at most nbmax times.
-
-C       nb = 1
-C       do while (1 .eq. 1)
-
-c        Copy the sparsity structure of A into L.
-
-         do i = 1, n+1
-            lcol_ptr(i) = acol_ptr(i)
+      do j = 1, n
+c        ldiag(j) = adiag(j)*(wa2(j)**2) + alpha
+         ldiag(j) = adiag(j)
+      end do
+      do j = 1, n
+         do i = acol_ptr(j), acol_ptr(j+1)-1
+C           l(i) = a(i)*wa2(j)*wa2(arow_ind(i))
+            l(i) = a(i)
          end do
-         do i = 1, nnz
-            lrow_ind(i) = arow_ind(i)
-         end do
+      end do
 
-c        Scale A and store in the lower triangular matrix L.
+c     Compute the incomplete factorization.
 
-         do j = 1, n
-c            ldiag(j) = adiag(j)*(wa2(j)**2) + alpha
-            ldiag(j) = adiag(j)
-         end do
-         do j = 1, n
-            do i = acol_ptr(j), acol_ptr(j+1)-1
-C                l(i) = a(i)*wa2(j)*wa2(arow_ind(i))
-               l(i) = a(i)
-            end do
-         end do
+      call dicf(n,nnz,l,ldiag,lcol_ptr,lrow_ind,p,info,
+     +          iwa(1),iwa(n+1),iwa(2*n+1),wa1)
 
-c        Attempt an incomplete factorization.
+c     Undo the scaling.
 
-         call dicf(n,nnz,l,ldiag,lcol_ptr,lrow_ind,p,info,
-     +        iwa(1),iwa(n+1),iwa(2*n+1),wa1)
+C     do i = 1, n
+C         ldiag(i) = ldiag(i)/wa2(i)
+C     end do
+C     do j = 1, lcol_ptr(n+1)-1
+C         l(j) = l(j)/wa2(lrow_ind(j))
+C     end do
 
-c        If the factorization exists, then test for termination.
-c        Otherwise increment the shift.
-
-C          if (info .ge. 0) then
-
-C c           If the shift is at the lower bound, reduce the shift.
-C c           Otherwise undo the scaling of L and exit.
-
-C             if (alpha .eq. alphas .and. nb .lt. nbmax) then
-C                alphas = alphas/nbfactor
-C                alpha = alphas
-C                nb = nb + 1
-C             else
-C                do i = 1, n
-C                   ldiag(i) = ldiag(i)/wa2(i)
-C                end do
-C                do j = 1, lcol_ptr(n+1)-1
-C                   l(j) = l(j)/wa2(lrow_ind(j))
-C                end do
-               return
-C             end if
-C          else
-C             alpha = max(two*alpha,alphas)
-C          end if
-C       end do
-
-C       return
+      return
 
       end
