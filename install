@@ -35,7 +35,7 @@ done
 [[ ${FFLAGS+set} == 'set' ]] || FFLAGS='-g -fno-second-underscore -flat_namespace -ffixed-form'
 
 # Build main library.
-make install CC="$CC" FC="$FC" CFLAGS="$CFLAGS" FFLAGS="$FFLAGS"
+make clean install CC="$CC" FC="$FC" CFLAGS="$CFLAGS" FFLAGS="$FFLAGS"
 [[ $? != 0 ]] && exit $?
 
 # Build Matlab interface. MEX requires gcc/gfortran 4.3
@@ -48,6 +48,6 @@ if [[ ! $skip_matlab_check ]]; then
     fi
 fi
 cd $top/matlab
-[[ ${MATLABPATH+set} == 'set' ]] || MATLABPATH='/Applications/Matlab/MATLAB_R2010b.app'
-CC="$CC" FC="$CC" MATLABPATH="$MATLABPATH" make matlab
+[[ ${MATLABDIR+set} == 'set' ]] || MATLABDIR='/Applications/Matlab/MATLAB_R2012a.app'
+CC="$CC" FC="$CC" MATLABDIR="$MATLABDIR" make matlab
 cd $top

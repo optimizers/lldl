@@ -20,13 +20,12 @@ blas:
 icf:
 	cd ../src/icf; make
 
-CMEX = $(MATLABPATH)/bin/mex
+CMEX = $(MATLABDIR)/bin/mex
 CMEXFLAGS = -DARCH=$(ARCH) -largeArrayDims -g #-DMXDEBUG
 
 # Path for mex.h
 
-MINCLUDE = $(MATLABPATH)/extern/include
-# MINCLUDE = /software/aix-4/com/packages/matlab-5.2/extern/include
+MINCLUDE = $(MATLABDIR)/extern/include
 
 matlab: lldl cgmex
 
