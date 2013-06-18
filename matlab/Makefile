@@ -28,10 +28,10 @@ CMEXFLAGS = -DARCH=$(ARCH) -largeArrayDims -g #-DMXDEBUG
 MINCLUDE = $(MATLABPATH)/extern/include
 # MINCLUDE = /software/aix-4/com/packages/matlab-5.2/extern/include
 
-matlab: icfmex cgmex
+matlab: lldl cgmex
 
-icfmex : icfmex.c
-	$(CMEX) $(CMEXFLAGS) -I$(MINCLUDE) icfmex.c $(LIBS)
+lldl : lldl.c
+	$(CMEX) $(CMEXFLAGS) -I$(MINCLUDE) lldl.c $(LIBS)
 
 cgmex : cgmex.c
 	$(CMEX) $(CMEXFLAGS) -I$(MINCLUDE) cgmex.c $(LIBS)
