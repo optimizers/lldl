@@ -1,7 +1,7 @@
 /*
 Calling syntax :
 
-   [L, Ldiag] = icfmex(lA, Adiag, p);
+   [L, D, shift] = lldl(lA, Adiag, p);
 
 */
 #if ARCH == aix-4
@@ -34,7 +34,7 @@ extern "C" {
   void dicfs_(int *n, int *nnz,
               double *a, double *adiag, int *acol_ptr, int *arow_ind,
               double *l, double *ldiag, int *lcol_ptr, int *lrow_ind,
-              int *p, int *iw, double *w1, double *w2);
+              int *p, double *alpha, int *iw, double *w1, double *w2);
   void quicksort_icfs(int numbers[], double values[], int low, int up);
   void print_int_array(const char *name, int *array, int len,
                        const char *fmt);
@@ -47,10 +47,12 @@ extern "C" {
       int n = 0, p = 0;
       double *a = NULL, *l = NULL;
       double *adiag = NULL, *ldiag = NULL;
+      double alpha = 0;
       mwIndex *acol_ptr = NULL, *arow_ind = NULL;
       int *acol_ptr_int = NULL, *arow_ind_int = NULL;
       mwIndex *lcol_ptr = NULL, *lrow_ind = NULL;
       int *lcol_ptr_int = NULL, *lrow_ind_int = NULL;
+      double *nptr = NULL;
 
       /* Working arrays */
 
@@ -115,7 +117,7 @@ extern "C" {
          acol_ptr_int[i] = (int)acol_ptr[i] + 1;
 
   #ifdef MXDEBUG
-      mexPrintf("Calling icfmex with n=%d, nnz=%d, p=%d\n", n, nnz, p);
+      mexPrintf("Calling lldl with n=%d, nnz=%d, p=%d\n", n, nnz, p);
       mexPrintf("%d input args and %d output args\n", nrhs, nlhs);
       mexPrintf("After conversion to Fortran indexing:\n");
       print_int_array("arow_ind", arow_ind_int, nnz, "%d ");
@@ -158,12 +160,12 @@ extern "C" {
       dicfs_(&n, &nnz,
              a, adiag, acol_ptr_int, arow_ind_int,
    	         l, ldiag, lcol_ptr_int, lrow_ind_int,
-             &p, iw, w1, w2);
+             &p, &alpha, iw, w1, w2);
 
       int nnzl = lcol_ptr_int[n] - 1;  /* -1 accounts for 1-based indexing */
 
    #ifdef MXDEBUG
-      mexPrintf("Returning from dicfs with nnzl=%d\n", nnzl);
+      mexPrintf("Returning from dicfs with nnzl=%d, alpha=%7.1e\n", nnzl, alpha);
       print_int_array("lrow_ind", lrow_ind_int, nnzl, "%d ");
       print_int_array("lcol_ptr", lcol_ptr_int, n+1, "%d ");
       print_double_array("ldiag", ldiag, n, "%8.1e ");
@@ -191,6 +193,10 @@ extern "C" {
 
       for (i = 0; i <= n; i++)
          lcol_ptr[i] = (mwIndex)(lcol_ptr_int[i] - 1);
+
+      plhs[2] = mxCreateDoubleMatrix(1, 1, mxREAL);
+      nptr = (double*)mxGetPr(plhs[2]);
+      *nptr = alpha;
 
    #ifdef MXDEBUG
       mexPrintf("Freeing memory\n");

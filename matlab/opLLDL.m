@@ -27,7 +27,8 @@ classdef opLLDL < opSpot
       D             % "Inverse" absolute value of diagonal incomplete factor
       Dinv          % "Inverse" diagonal incomplete factor (for normest)
       nnz           % Number of nonzeros in L
-      p             % Limited-memory factor.
+      p             % Limited-memory factor
+      shift         % The shift necessary to complete the factorization.
    end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,14 +53,14 @@ classdef opLLDL < opSpot
 
          % Construct operator
          op = op@opSpot('LLDL', n, n);
-         op.cflag        = false;
-         op.p            = max(p,0);
-         [L, D]          = lldl(sparse(tril(K,-1)), full(diag(K)), op.p);
-         op.nnz          = nnz(L);
-         op.L            = inv(opMatrix(L + speye(size(L))));
-         op.D            = opDiag(1./abs(D));
-         op.Dinv         = opDiag(1./D);           % For op.normest().
-         op.sweepflag    = true;
+         op.cflag         = false;
+         op.p             = max(p,0);
+         [L, D, op.shift] = lldl(sparse(tril(K,-1)), full(diag(K)), op.p);
+         op.nnz           = nnz(L);
+         op.L             = inv(opMatrix(L + speye(size(L))));
+         op.D             = opDiag(1./abs(D));
+         op.Dinv          = opDiag(1./D);           % For op.normest().
+         op.sweepflag     = true;
       end % function opLLDL
 
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
