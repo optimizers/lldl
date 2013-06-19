@@ -60,6 +60,11 @@ Here is an example Matlab session:
     [L, D, shift] = lldl(lA, Adiag, p);
     L = L + speye(size(L));  % Diagonal was left out of L.
 
+In practice it is more programmatically convenient to use the incomplete factors L and D as implicitly defining the preconditioner by bundling them into an abstract [SPOT](https://github.com/mpf/spot) operator:
+
+    LLDL = opLLDL(A, p);
+    x = LLDL * y;  % Solves the system L * |D| * L' x = y;
+
 ## Python Interface
 
 A Python interface is included as part of [NLPy](https://github.com/dpo/nlpy).

@@ -7,7 +7,21 @@ classdef opLLDL < opSpot
 %
 %   opLLDL(K,p) creates an operator for multiplication by preconditioned
 %   operator, where L and D are limited-memory factors with factor p.
-%   Note that K is an explicit matrix.
+%   Note that K is an explicit matrix. The public properties are:
+%
+%      L     : "Inverse" lower triangular incomplete factor
+%      D     : "Inverse" absolute value of diagonal incomplete factor
+%      Dinv  : "Inverse" diagonal incomplete factor (for normest)
+%      nnz   : Number of nonzeros in L
+%      p     : Limited-memory factor
+%      shift : The shift necessary to complete the factorization.
+%
+%   Public methods:
+%
+%      normest : estimate the norm of inv(L*D*L') (note that D appears,
+%                not its absolute value). This may be useful to
+%                estimate the condition number of the input operator,
+%                though this estimate is rarely accurate.
 %
 %   See also ldl.
 %
