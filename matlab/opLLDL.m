@@ -9,12 +9,14 @@ classdef opLLDL < opSpot
 %   operator, where L and D are limited-memory factors with factor p.
 %   Note that K is an explicit matrix. The public properties are:
 %
-%      L     : "Inverse" lower triangular incomplete factor
-%      D     : "Inverse" absolute value of diagonal incomplete factor
-%      Dinv  : "Inverse" diagonal incomplete factor (for normest)
-%      nnz   : Number of nonzeros in L
-%      p     : Limited-memory factor
-%      shift : The shift necessary to complete the factorization.
+%      L         : "Inverse" lower triangular incomplete factor
+%      D         : "Inverse" absolute value of diagonal incomplete factor
+%      Dinv      : "Inverse" diagonal incomplete factor (for normest)
+%      nnz       : Number of nonzeros in L
+%      p         : Limited-memory factor
+%      shift     : The shift necessary to complete the factorization
+%      growth    : Growth factor max(max |L|, max |D|) / max |K|
+%      minpivot  : Smallest pivot in absolute value.
 %
 %   Public methods:
 %
@@ -42,7 +44,9 @@ classdef opLLDL < opSpot
       Dinv          % "Inverse" diagonal incomplete factor (for normest)
       nnz           % Number of nonzeros in L
       p             % Limited-memory factor
-      shift         % The shift necessary to complete the factorization.
+      shift         % The shift necessary to complete the factorization
+      growth        % Growth factor max(max |L|, max |D|) / max |K|
+      minpivot      % Smallest pivot in absolute value.
    end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,9 +74,12 @@ classdef opLLDL < opSpot
          op.cflag         = false;
          op.p             = max(p,0);
          [L, D, op.shift] = lldl(sparse(tril(K,-1)), full(diag(K)), op.p);
+         absD             = abs(D);
+         op.growth        = full(max(max(abs(L)), max(absD)) / max(abs(tril(K))));
+         op.minpivot      = min(absD);
          op.nnz           = nnz(L);
          op.L             = inv(opMatrix(L + speye(size(L))));
-         op.D             = opDiag(1./abs(D));
+         op.D             = opDiag(1./absD);
          op.Dinv          = opDiag(1./D);           % For op.normest().
          op.sweepflag     = true;
       end % function opLLDL
