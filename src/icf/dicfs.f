@@ -140,7 +140,7 @@ c     Compute the scaling matrix S.
 c     Compute the initial shift.
 
       alphas = alpham
-      alpha = zero
+C       alpha = zero
       do i = 1, n
          if (adiag(i) .eq. zero) then
             alpha = alphas
