@@ -1,24 +1,26 @@
       subroutine dpcg(n,a,adiag,acol_ptr,arow_ind,
-     +               l,ldiag,lcol_ptr,lrow_ind,
+     +               l,d,lcol_ptr,lrow_ind,
      +               b,rtol,itmax,x,iters,info,p,q,r,z)
+
+      implicit none
       integer n, itmax, iters, info
       integer acol_ptr(n+1), arow_ind(*), lcol_ptr(n+1), lrow_ind(*)
       double precision rtol
-      double precision a(*), adiag(n), l(*), ldiag(n), b(n)
+      double precision a(*), adiag(n), l(*), d(n), b(n)
       double precision x(n)
       double precision p(n), q(n), r(n), z(n)
 c     *********
-c     
+c
 c     Subroutine dpcg
-c     
+c
 c     Given a sparse symmetric matrix A in compressed row storage,
 c     this subroutine uses a preconditioned conjugate gradiene method
 c     to solve the system A*x = b.
-c     
+c
 c     The subroutine statement is
 c
 c       subroutine dpcg(n,a,adiag,acol_ptr,arow_ind,
-c                       l,ldiag,lcol_ptr,lrow_ind,
+c                       l,d,lcol_ptr,lrow_ind,
 c                       b,rtol,itmax,x,iters,info,p,q,r,z)
 c
 c     where
@@ -43,7 +45,7 @@ c            acol_ptr(j), ... , acol_ptr(j+1) - 1.
 c         On exit acol_ptr is unchanged.
 c
 c       arow_ind is an integer array of dimension *.
-c         On entry arow_ind must contain row indices for the strict 
+c         On entry arow_ind must contain row indices for the strict
 c            lower triangular part of A in compressed column storage.
 c         On exit arow_ind is unchanged.
 c
@@ -52,9 +54,9 @@ c         On entry l need not be specified.
 c         On exit l contains the strict lower triangular part
 c            of L in compressed column storage.
 c
-c       ldiag is a double precision array of dimension n.
-c         On entry ldiag need not be specified.
-c         On exit ldiag contains the diagonal elements of L.
+c       d is a double precision array of dimension n.
+c         On entry d need not be specified.
+c         On exit d contains the diagonal elements of D.
 c
 c       lcol_ptr is an integer array of dimension n + 1.
 c         On entry lcol_ptr need not be specified.
@@ -66,7 +68,7 @@ c       lrow_ind is an integer array of dimension nnz+n*p.
 c         On entry lrow_ind need not be specified.
 c         On exit lrow_ind contains row indices for the strict lower
 c            triangular part of L in compressed column storage.
-c    
+c
 c       b is a double precision array of dimension n.
 c         On entry b must contain the vector b.
 c         On exit b is unchanged.
@@ -74,7 +76,7 @@ c
 c       rtol is a double precision variable.
 c         On entry rtol specifies the relative convergence test.
 c         On exit rtol is unchanged
-c     
+c
 c       itmax is an integer variable.
 c         On entry itmax specifies the limit on the number of
 c            conjugate gradient iterations.
@@ -86,9 +88,9 @@ c         On exit x contains the final conjugate gradient iterate.
 c
 c       iters is an integer variable.
 c         On entry iters need not be specified.
-c         On exit iters is set to the number of conjugate 
+c         On exit iters is set to the number of conjugate
 c            gradient iterations.
-c     
+c
 c       info is an integer variable.
 c         On entry info need not be specified.
 c         On exit info is set as follows:
@@ -102,13 +104,13 @@ c
 c             info = 3  Failure to converge after itmax iterations.
 c
 c       p is a double precision work array of dimension n.
-c     
+c
 c       q is a double precision work array of dimension n.
-c     
+c
 c       r is a double precision work array of dimension n.
-c     
+c
 c       z is a double precision work array of dimension n.
-c     
+c
 c     Subprograms called
 c
 c       MINPACK-2  ......  dstrsol, dssyax
@@ -127,7 +129,7 @@ c     **********
       double precision alpha, beta, bnorm, ptq, rho, rnorm, rtz
 
       external dstrsol, dssyax
-      external daxpy, dcopy 
+      external daxpy, dcopy
       double precision ddot, dnrm2
 
 c     Initialize the iterate x and the residual r.
@@ -146,10 +148,11 @@ c     Exit if b = 0.
       if (bnorm .eq. zero) return
 
 c     Initialize z by solving L*L'*z = r.
-         
+
       call dcopy(n,r,1,z,1)
-      call dstrsol(n,l,ldiag,lcol_ptr,lrow_ind,z,'N')
-      call dstrsol(n,l,ldiag,lcol_ptr,lrow_ind,z,'T')
+      call dstrsol(n,l,d,lcol_ptr,lrow_ind,z,'N')
+      call dstrsol(n,l,d,lcol_ptr,lrow_ind,z,'D')
+      call dstrsol(n,l,d,lcol_ptr,lrow_ind,z,'T')
 
 c     Initialize p.
 
@@ -157,16 +160,16 @@ c     Initialize p.
 
 c     Initialize rho.
 
-      rho = ddot(n,r,1,z,1) 
+      rho = ddot(n,r,1,z,1)
 
       do iters = 1, itmax
 
 c        Compute q = A*p.
 
          call dssyax(n,a,adiag,acol_ptr,arow_ind,p,q)
-         
+
 c        Check for negative curvature.
-         
+
          ptq = ddot(n,p,1,q,1)
          if (ptq .le. zero) then
             info = 2
@@ -174,8 +177,8 @@ c        Check for negative curvature.
          end if
 
 c        Update x.
-         
-         alpha = rho/ptq 
+
+         alpha = rho/ptq
          call daxpy(n,alpha,p,1,x,1)
 
 c        Update the residual.
@@ -186,16 +189,17 @@ c        Update the residual.
 c        Exit if the residual convergence test is satisfied.
 
          if (rnorm .le. rtol*bnorm) return
-         
+
 c        Solve L*L'*z = r.
 
          call dcopy(n,r,1,z,1)
-         call dstrsol(n,l,ldiag,lcol_ptr,lrow_ind,z,'N')
-         call dstrsol(n,l,ldiag,lcol_ptr,lrow_ind,z,'T')
+         call dstrsol(n,l,d,lcol_ptr,lrow_ind,z,'N')
+         call dstrsol(n,l,d,lcol_ptr,lrow_ind,z,'D')
+         call dstrsol(n,l,d,lcol_ptr,lrow_ind,z,'T')
 
 c        Compute new rho.
-         
-         rtz = ddot(n,r,1,z,1) 
+
+         rtz = ddot(n,r,1,z,1)
 
          beta = rtz/rho
 
