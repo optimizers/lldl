@@ -83,10 +83,15 @@ classdef opLLDL < opSpot
          op.p             = max(p,0);
          [L, D, op.shift] = lldl(sparse(tril(K,-1)), full(diag(K)), op.p, shift);
          absD             = abs(D);
-         op.growth        = full(max(max(abs(L)), max(absD)) / max(abs(tril(K))));
-         op.minpivot      = min(absD);
          op.nnz           = nnz(L);
-         op.L             = inv(opMatrix(L + speye(size(L))));
+
+         % Growth factor: max(|L * sqrt(|D|)) / max(|K|).
+         L                = L + speye(n);
+         LD               = L * spdiags(sqrt(abs(D)), 0, n, n);
+         op.growth        = full(max(max(abs(LD))) / max(max(abs(tril(K)))));
+
+         op.minpivot      = min(absD);
+         op.L             = inv(opMatrix(L));
          op.D             = opDiag(1./absD);
          op.Dinv          = opDiag(1./D);           % For op.normest().
          op.sweepflag     = true;
