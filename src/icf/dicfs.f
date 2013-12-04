@@ -17,6 +17,7 @@ c     subroutine computes an incomplete LDL factorization of A + alpha * D
 c     where alpha > 0 is a shift and D is a diagonal matrix whose entries are
 c     the 2-norm of the columns of A multiplied by the sign of the diagonal
 c     element of A.
+c     dominique.orban@gerad.ca based on Lin and More's original ICFS.
 c
 c     The subroutine statement is
 c
@@ -62,7 +63,7 @@ c            of L in compressed column storage.
 c
 c       d is a double precision array of dimension n.
 c         On entry d need not be specified.
-c         On exit d contains the diagonal elements of L.
+c         On exit d contains the diagonal elements of D.
 c
 c       lcol_ptr is an integer array of dimension n + 1.
 c         On entry lcol_ptr need not be specified.
@@ -111,7 +112,8 @@ c     **********
 
       external dicf
 
-c     Compute the l2 norms of the columns of A.
+c     Compute the l2 norms of the columns of A
+c     and largest element in absolute value.
 
       do i = 1, n
          wa1(i) = adiag(i)**2
@@ -140,15 +142,12 @@ c     Compute the scaling matrix S.
 c     Compute the initial shift.
 
       alphas = alpham
-C       alpha = zero
+      if (alpha .gt. zero) alpha = max(alpha, alphas)
       do i = 1, n
          if (adiag(i) .eq. zero) then
-            alpha = alphas
-C          else
-C             alpha = max(alpha,-adiag(i)*(wa2(i)**2))
+            alpha = max(alpha, alphas)
          end if
       end do
-      if (alpha .gt. zero) alpha = max(alpha,alphas)
 
 c     Search for an acceptable shift. During the search we decrease
 c     the lower bound alphas until we determine a lower bound that
