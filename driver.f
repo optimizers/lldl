@@ -1,5 +1,6 @@
       program dmain
 
+      implicit none
       character*10 fread, fwrite
       parameter (fread='icf.dat',fwrite='icf.info')
       integer nnzmax, nmax, maxnp
@@ -19,7 +20,7 @@ c
 c     **********
       character *60 prob_name
 
-      integer i, j, np, nnza, nnzl
+      integer i, j, k, np, nnza, nnzl
       integer p(maxnp)
       double precision fval, rerr
 
@@ -29,9 +30,9 @@ c     ICFS.
       integer arow_ind(nnzmax), acol_ind(nnzmax), acol_ptr(nmax+1)
       integer lcol_ptr(nmax), lrow_ind(nnzmax)
       integer iw(3*nmax)
-      double precision alpha 
-      double precision a(nnzmax), adiag(nmax), l(nnzmax), ldiag(nmax)
-      double precision w(4*nmax) 
+      double precision alpha
+      double precision a(nnzmax), adiag(nmax), l(nnzmax), d(nmax)
+      double precision w(4*nmax)
 
 c     Preconditioned conjugate gradient.
 
@@ -88,13 +89,13 @@ c        Read the matrix elements.
      +        nnzmax,arow_ind,acol_ind,ival,a,cval)
          n = nrows
 
-c        Change from coordinate storage to compresses column storage.
+c        Change from coordinate storage to compressed column storage.
 
          call srtdat2(n,nnz,a,adiag,arow_ind,acol_ind,acol_ptr,iw)
 
 c        Generate the right hand side.
 c        We set b = A*e, where e is the vector of ones.
-c        Note that the paper of Lin and More', "Incomplete Cholesky 
+c        Note that the paper of Lin and More', "Incomplete Cholesky
 c        factorizations with limited memory", uses b = e.
 
          do i = 1, n
@@ -109,8 +110,8 @@ c        factorizations with limited memory", uses b = e.
 
 c        Modify the matrix for the optimization problems.
 
-         if (prob_name(8:11) .eq. 'dgl2' .or. 
-     +       prob_name(8:14) .eq. 'nlmsurf' .or. 
+         if (prob_name(8:11) .eq. 'dgl2' .or.
+     +       prob_name(8:14) .eq. 'nlmsurf' .or.
      +       prob_name(8:13) .eq. 'jimack') then
             do i = 1, n
                adiag(i) = adiag(i)*(1.0d0 + 1.d-5)
@@ -121,35 +122,38 @@ c        Modify the matrix for the optimization problems.
 
 c           Check for sufficient memory.
 
-            nnz = acol_ptr(n+1) - 1 
+            nnz = acol_ptr(n+1) - 1
             if (nnz + p(j)*n .gt. nnzmax) then
-               write (*,*) 'Parameter nnzmax is too small'
+               write (*,*) 'Raise nnzmax to at least ', (nnz + p(j)*n)
                stop
             end if
 
 c           Compute the preconditioner L.
-            
+
             call cputime(time1)
 
             if (p(j) .lt. 0) then
                do i = 1, n
-                  ldiag(i) = sqrt(adiag(i))
+                  d(i) = adiag(i)
                   lcol_ptr(i) = 1
                end do
                lcol_ptr(n+1) = 1
             else
                alpha = 0.0d0
                call dicfs(n,nnz,a,adiag,acol_ptr,arow_ind,
-     +                    l,ldiag,lcol_ptr,lrow_ind,
+     +                    l,d,lcol_ptr,lrow_ind,
      +                    p(j),alpha,iw,w,w(n+1))
+               do i = 1, n
+                  if (d(i) .lt. 0) d(i) = -d(i)
+               end do
             end if
 
-c           Solve Ax = b with the preconditioned 
+c           Solve Ax = b with the preconditioned
 c           conjugate gradient method.
 
             rtol = 1.0d-6
             maxiter = max(n,100)
-            call dpcg(n,a,adiag,acol_ptr,arow_ind,l,ldiag,
+            call dpcg(n,a,adiag,acol_ptr,arow_ind,l,d,
      +           lcol_ptr,lrow_ind,b,rtol,maxiter,x,
      +           iters,info,w,w(n+1),w(2*n+1),w(3*n+1))
 
@@ -175,7 +179,7 @@ c           Compute relative error and function value.
             nnzl = lcol_ptr(n+1) - 1
             nnza = acol_ptr(n+1) - 1
 
-            write (nwrite,1000) prob_name(8:30), n, p(j), nnz, nnzl, 
+            write (nwrite,1000) prob_name(8:30), n, p(j), nnz, nnzl,
      +         dble(nnzl+n)/dble(nnz+n),
      +         dble(nnza+n*p(j)-nnzl)/dble(nnza+n*p(j)),
      +         iters,alpha,info,rerr,fval,time2-time1
