@@ -7,6 +7,10 @@ classdef opLLDL < opSpot
 %
 %   opLLDL(K,p) creates an operator for multiplication by preconditioned
 %   operator, where L and D are limited-memory factors with factor p.
+%
+%   opLLDL(K,p,shift) is equivalent to opLLDL(K + shift * I, p), where
+%   I is the identity matrix. The default value of shift is zero.
+%
 %   Note that K is an explicit matrix. The public properties are:
 %
 %      L         : "Inverse" lower triangular incomplete factor
@@ -57,9 +61,13 @@ classdef opLLDL < opSpot
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % opLDL. Constructor
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      function op = opLLDL(K, p)
-         if nargin ~= 2
+
+      function op = opLLDL(K, p, shift)
+         if nargin < 2 | nargin > 3
             error('Invalid number of arguments.');
+         end
+         if ~exist('shift', 'var') || isempty(shift)
+            shift = 0;
          end
 
          % Get size of input matrix
@@ -73,7 +81,7 @@ classdef opLLDL < opSpot
          op = op@opSpot('LLDL', n, n);
          op.cflag         = false;
          op.p             = max(p,0);
-         [L, D, op.shift] = lldl(sparse(tril(K,-1)), full(diag(K)), op.p);
+         [L, D, op.shift] = lldl(sparse(tril(K,-1)), full(diag(K)), op.p, shift);
          absD             = abs(D);
          op.growth        = full(max(max(abs(L)), max(absD)) / max(abs(tril(K))));
          op.minpivot      = min(absD);
@@ -87,6 +95,7 @@ classdef opLLDL < opSpot
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % transpose
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
       function opOut = transpose(op)
          opOut = op;
       end
@@ -101,11 +110,13 @@ classdef opLLDL < opSpot
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % Methods - protected
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
    methods( Access = protected )
 
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % multiply
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
       function y = multiply(op, x, mode)
          y = op.L' * op.D * op.L * x;
       end % function multiply
