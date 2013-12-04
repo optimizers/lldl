@@ -99,6 +99,9 @@ extern "C" {
 
       p = (int)mxGetScalar(prhs[2]);
 
+      if (nrhs > 2)
+        alpha = (double)mxGetScalar(prhs[3]);
+
       /* Because mwIndex differs from int, we are required to COPY the
          input matrix into int* arrays. Isn't Matlab the tool?
          Anyways. Account for Fortran indexing. */
