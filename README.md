@@ -73,6 +73,10 @@ A Python interface is included as part of [NLPy](https://github.com/dpo/nlpy).
 
 Search existing [issues](https://github.com/optimizers/lldl/issues). If that does not answer your question, please open a [new issue](https://github.com/optimizers/lldl/issues/new).
 
+## Relics
+
+The test problems in the `tprobs` folder and the preconditioned CG implementation are relics of ICFS. The main driver is not applicable, except if the coefficient matrix is definite.
+
 ## To Do List
 
 This is a list of improvements that could be added to LLDL to improve its efficiency, particularly with Matlab.
