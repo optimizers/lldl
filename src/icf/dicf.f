@@ -7,6 +7,9 @@
       double precision w(n)
 c     *********
 c
+c     A modification of Lin and More's original ICFS to produce a LDL' factorization.
+c     dominique.orban@gerad.ca
+c
 c     Subroutine dicf
 c
 c     Given a sparse symmetric quasi-definite matrix A in compressed
@@ -190,7 +193,6 @@ c                 w(i) = l(i,j), lval = l(j,k), a(ip) = l(i,k)
                end if
             end do
 
-c           Should this just say k = list(k) ?
             k = newk
          end do
 
@@ -199,7 +201,8 @@ c        Compute the j-th column of L.
          do k = 1, nlj
             w(indr(k)) = w(indr(k))/diag(j)
 
-c           Shouldn't this be here???
+c           Update the diagonal elements.
+c           Variant I.
             diag(indr(k)) = diag(indr(k)) - diag(j) * w(indr(k))**2
          end do
 
@@ -238,7 +241,8 @@ c        of the j-th column of L are a(newisj) and a(newiej).
          end do
 
 c        Update the diagonal elements.
-c        Is this at the right place?
+c        Variant II.
+c        Lin and More report that this variant performs better.
 
 C          do k = kth, nlj
 C             diag(indr(k)) = diag(indr(k)) - diag(j) * w(indr(k))**2

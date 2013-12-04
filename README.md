@@ -73,13 +73,16 @@ A Python interface is included as part of [NLPy](https://github.com/dpo/nlpy).
 
 Search existing [issues](https://github.com/optimizers/lldl/issues). If that does not answer your question, please open a [new issue](https://github.com/optimizers/lldl/issues/new).
 
+## Relics
+
+The test problems in the `tprobs` folder and the preconditioned CG implementation are relics of ICFS. The main driver is not applicable, except if the coefficient matrix is definite.
+
 ## To Do List
 
-This is a list of improvements that should be added to LLDL to improve its efficiency, particularly with Matlab.
+This is a list of improvements that could be added to LLDL to improve its efficiency, particularly with Matlab.
 
+- [ ] Drop-off threshold.
 - [ ] Implicit permutation: instead of having to explicity apply a reordering, the user supplies a permutation vector. The incomplete factorization proceeds in the order given by this permutation vector.
-- [x] In a typical Matlab application, only the lower triangle of the matrix should be kept in memory and should be wrapped into a SPOT operator to compute matrix-vector products and take the permutation into account implicitly.
-- [x] Reinstate the modification of the diagonal to obtain a SQD H-matrix. A first idea is A(i,i) += α if A(i,i) > 0 and A(i,i) -= α if A(i,i) < 0, where α > 0.
 
 ## References
 
