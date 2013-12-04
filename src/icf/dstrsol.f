@@ -1,4 +1,4 @@
-      subroutine dstrsol(n,l,ldiag,jptr,indr,r,task)
+      subroutine dstrsol(n,l,d,jptr,indr,r,task)
       character*60 task
       integer n
       integer jptr(n+1), indr(*)
@@ -7,11 +7,12 @@ c     **********
 c
 c     Subroutine dstrsol
 c
-c     This subroutine solves the triangular systems L*x = r or L'*x = r.
+c     This subroutine solves the triangular systems L*x = r, L'*x = r
+c     or the diagonal system D*x = r.
 c
 c     The subroutine statement is
 c
-c       subroutine dstrsol(n,l,ldiag,jptr,indr,r,task)
+c       subroutine dstrsol(n,l,d,jptr,indr,r,task)
 c
 c     where
 c
@@ -22,11 +23,12 @@ c
 c       l is a double precision array of dimension *.
 c         On entry l must contain the nonzeros in the strict lower
 c            triangular part of L in compressed column storage.
+c            The diagonal of L is assumed to be all ones.
 c         On exit l is unchanged.
 c
-c       ldiag is a double precision array of dimension n.
-c         On entry ldiag must contain the diagonal elements of L.
-c         On exit ldiag is unchanged.
+c       d is a double precision array of dimension n.
+c         On entry d must contain the diagonal elements of D.
+c         On exit d is unchanged.
 c
 c       jptr is an integer array of dimension n + 1.
 c         On entry jptr must contain pointers to the columns of A.
@@ -35,7 +37,7 @@ c            jptr(j), ... , jptr(j+1) - 1.
 c         On exit jptr is unchanged.
 c
 c       indr is an integer array of dimension *.
-c         On entry indr must contain row indices for the strict 
+c         On entry indr must contain row indices for the strict
 c            lower triangular part of L in compressed column storage.
 c         On exit indr is unchanged.
 c
@@ -44,9 +46,10 @@ c         On entry r must contain the vector r.
 c         On exit r contains the solution vector x.
 c
 c       task is a character variable of length 60.
-c         On entry 
+c         On entry
 c            task(1:1) = 'N' if we need to solve L*x = r
 c            task(1:1) = 'T' if we need to solve L'*x = r
+c            task(1:1) = 'D' if we need to solve D*x = r
 c         On exit task is unchanged.
 c
 c     MINPACK-2 Project. May 1998.
@@ -64,7 +67,7 @@ c     Solve L*x =r and store the result in r.
       if (task(1:1) .eq. 'N') then
 
          do j = 1, n
-            temp = r(j)/ldiag(j)
+            temp = r(j)
             do k = jptr(j), jptr(j+1) - 1
                r(indr(k)) = r(indr(k)) - l(k)*temp
             end do
@@ -79,17 +82,29 @@ c     Solve L'*x =r and store the result in r.
 
       if (task(1:1) .eq. 'T') then
 
-         r(n) = r(n)/ldiag(n)
+         r(n) = r(n)
          do j = n - 1, 1, -1
             temp = zero
             do k = jptr(j), jptr(j+1) - 1
                temp = temp + l(k)*r(indr(k))
             end do
-            r(j) = (r(j) - temp)/ldiag(j)
+            r(j) = r(j) - temp
          end do
 
          return
 
       end if
 
-      end 
+c     Solve D*x =r and store the result in r.
+
+      if (task(1:1) .eq. 'D') then
+
+         do j = 1, n
+            r(j) = r(j) / d(j)
+         end do
+
+         return
+
+      end if
+
+      end
