@@ -1,8 +1,9 @@
       subroutine dstrsol(n,l,d,jptr,indr,r,task)
+      implicit none
       character*60 task
       integer n
       integer jptr(n+1), indr(*)
-      double precision l(*), ldiag(n), r(n)
+      double precision l(*), d(n), r(n)
 c     **********
 c
 c     Subroutine dstrsol
