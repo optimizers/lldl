@@ -99,7 +99,7 @@ extern "C" {
 
       p = (int)mxGetScalar(prhs[2]);
 
-      if (nrhs > 2)
+      if (nrhs > 3)
         alpha = (double)mxGetScalar(prhs[3]);
 
       /* Because mwIndex differs from int, we are required to COPY the
