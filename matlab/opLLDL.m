@@ -8,8 +8,9 @@ classdef opLLDL < opSpot
 %   opLLDL(K,p) creates an operator for multiplication by preconditioned
 %   operator, where L and D are limited-memory factors with factor p.
 %
-%   opLLDL(K,p,shift) is equivalent to opLLDL(K + shift * I, p), where
-%   I is the identity matrix. The default value of shift is zero.
+%   opLLDL(K,p,shift) is equivalent to opLLDL(K + shift * E, p), where
+%   E is diagonal with +1s and -1s on the diagonal, with the same
+%   definiteness pattern as K. The default value of shift is zero.
 %
 %   Note that K is an explicit matrix. The public properties are:
 %

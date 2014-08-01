@@ -86,6 +86,12 @@ extern "C" {
          mexErrMsgIdAndTxt("MATLAB:icfmex:inputNotSquare",
                        "Input argument 0 must be square.");
 
+  #ifdef MXDEBUG
+      mexPrintf("Entering lldl()\n");
+      mexPrintf("%d input args and %d output args\n", nrhs, nlhs);
+      mexPrintf("Reading lower triangular matrix...\n");
+  #endif
+
       a = mxGetPr(prhs[0]);                  /* Length nnz (0 ... nnz-1) */
       arow_ind = mxGetIr(prhs[0]);           /* Length nnz (0 ... nnz-1) */
       acol_ptr = mxGetJc(prhs[0]);           /* Length n+1 (0 ... n)     */
@@ -95,12 +101,25 @@ extern "C" {
          mexErrMsgIdAndTxt("MATLAB:icfmex:inputNotDouble",
                "Input argument 1 must be of type double.");
 
+  #ifdef MXDEBUG
+      mexPrintf("Reading diagonal...\n");
+  #endif
+
       adiag = (double*)mxGetData(prhs[1]);   /* Length n   (0 ... n-1)   */
+
+  #ifdef MXDEBUG
+      mexPrintf("Reading limited-memory factor...\n");
+  #endif
 
       p = (int)mxGetScalar(prhs[2]);
 
-      if (nrhs > 2)
+      if (nrhs > 3)
         alpha = (double)mxGetScalar(prhs[3]);
+
+  #ifdef MXDEBUG
+      mexPrintf("Calling lldl with n=%d, nnz=%d, p=%d\n", n, nnz, p);
+      mexPrintf("Copying arrays...\n");
+  #endif
 
       /* Because mwIndex differs from int, we are required to COPY the
          input matrix into int* arrays. Isn't Matlab the tool?
@@ -120,14 +139,12 @@ extern "C" {
          acol_ptr_int[i] = (int)acol_ptr[i] + 1;
 
   #ifdef MXDEBUG
-      mexPrintf("Calling lldl with n=%d, nnz=%d, p=%d\n", n, nnz, p);
-      mexPrintf("%d input args and %d output args\n", nrhs, nlhs);
       mexPrintf("After conversion to Fortran indexing:\n");
       print_int_array("arow_ind", arow_ind_int, nnz, "%d ");
       print_int_array("acol_ptr", acol_ptr_int, n+1, "%d ");
       print_double_array("adiag", adiag, n, "%8.1e ");
       print_double_array("a", a, nnz, "%8.1e ");
-   #endif
+  #endif
 
       /* Left-hand side: output args */
 

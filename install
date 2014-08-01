@@ -48,6 +48,6 @@ if [[ ! $skip_matlab_check ]]; then
     fi
 fi
 cd $top/matlab
-[[ ${MATLABDIR+set} == 'set' ]] || MATLABDIR='/Applications/Matlab/MATLAB_R2012a.app'
+[[ ${MATLABDIR+set} == 'set' ]] || MATLABDIR='/Applications/Matlab/MATLAB_R2013b.app'
 CC="$CC" FC="$CC" MATLABDIR="$MATLABDIR" make matlab
 cd $top
