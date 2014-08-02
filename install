@@ -34,7 +34,7 @@ done
 [[ ${CC+set} == 'set' ]] || CC=gcc-4.3
 [[ ${CFLAGS+set} == 'set' ]] || CFLAGS='-g -fPIC -fno-second-underscore -flat_namespace'
 [[ ${FC+set} == 'set' ]] || FC=gfortran-4.3
-[[ ${FFLAGS+set} == 'set' ]] || FFLAGS='-g -fPIC -fno-second-underscore -flat_namespace -ffixed-form'
+[[ ${FFLAGS+set} == 'set' ]] || FFLAGS='-g -fPIC -fno-second-underscore -flat_namespace -ffixed-form -pedantic -Wall'
 
 # Build main library.
 make clean install PREFIX="$PREFIX" CC="$CC" FC="$FC" CFLAGS="$CFLAGS" FFLAGS="$FFLAGS"
