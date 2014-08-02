@@ -3,11 +3,11 @@
 #
 
 L_ARCH   = $(ARCH)
-LIB_NAME = d-$(L_ARCH).a
+LIB_NAME = liblldl_utils.dylib
 
-CPPFLAGS  = -E -C -D$(ARCH)
+CPPFLAGS  = -E -C -D$(ARCH) -fPIC
 
-AR = ar -rcv
+AR = $(FC) -shared -Wl,-framework -Wl,Accelerate -Wl,-install_name -Wl,$(PREFIX)/lib/$(LIB_NAME) -o
 
 FILES = cputime_$(ARCH).o  dpmeps.o  mmio.o
 
