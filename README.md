@@ -127,6 +127,10 @@ This is a list of improvements that could be added to LLDL to improve its effici
 
 ## References
 
+* [D. Orban. Limited-Memory LDL<sup>T</sup> Factorization of Symmetric
+  Quasi-Definite Matrices with Application to Constrained Optimization. Cahier
+  du GERAD G-2013-87. GERAD, Montreal,
+  Canada](http://www.gerad.ca/~orban/_static/go2013.pdf).
 * [C.-J. Lin and J. J. Moré. Incomplete Cholesky factorizations with limited memory. *SIAM Journal on Scientific Computing*, 21(1):24--45, 1999](http://dx.doi.org/10.1137/S1064827597327334).
 
 ## Notes
