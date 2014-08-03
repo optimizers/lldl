@@ -19,23 +19,29 @@ It remains possible to use [MINRES](http://www.stanford.edu/group/SOL/software/m
 
 Just do it ;)
 
-    ./install
+````bash
+./install
+````
 
 You can use non-default compilers and compiler flags by passing options to the `install` script. For instance
 
-    CC=clang FC=ifort CFLAGS='-g' FFLAGS='-FI' ./install
+````bash
+CC=clang FC=ifort CFLAGS='-g' FFLAGS='-FI' ./install
+````
 
 Here is the complete list:
 
-    $ ./install --help
-    install [--help] [--skip-matlab-check]
-    The following environment variables may be set to influence
-    the behavior of the install procedure:
-      CC           C compiler executable
-      FC           Fortran compiler executable
-      CFLAGS       C compiler flags
-      FFLAGS       Fortran compiler flags
-      MATLABDIR    Path to Matlab's bin and extern subdirs
+````bash
+$ ./install --help
+install [--help] [--skip-matlab-check]
+The following environment variables may be set to influence
+the behavior of the install procedure:
+  CC           C compiler executable
+  FC           Fortran compiler executable
+  CFLAGS       C compiler flags
+  FFLAGS       Fortran compiler flags
+  MATLABDIR    Path to Matlab's bin and extern subdirs
+````
 
 ## Matlab Interface
 
@@ -45,29 +51,62 @@ You can specify the location of Matlab's `bin` and `extern` subdirectories using
 
 The original Matlab interface has been fixed and modernized. The Mathworks [only support version 4.3 gfortran](http://www.mathworks.com/support/compilers/R2013a/index.html?sec=maci64) on OSX and Linux. On Linux, `gcc-4.3` should be found in your package manager. On OSX, I recommend using [Homebrew](http://mxcl.github.io/homebrew). Once Homebrew is installed, `gcc-4.3`, including the Fortran compiler, may be installed using
 
-    brew tap homebrew/versions
-    brew install gcc43 --enable-fortran --enable-profiled-build
+````bash
+brew tap homebrew/versions
+brew install gcc43 --enable-fortran --enable-profiled-build
+````
 
 The compiler executables installed by the above commands are those used by default in LLDL's `install` script. If you know that your compilers will produce valid MEX files (it is the case for `gcc-4.2` and `gfortran-4.2` on OSX 10.6.8), then:
 
-    ./install --skip-matlab-check
+````bash
+./install --skip-matlab-check
+````
 
 Here is an example Matlab session:
 
-    n = 6; m = 4; E = rand(m,n);
-    A = [(n+m+1)*eye(n) E' ; E -(n+m+1)*eye(m)];
-    Adiag = full(diag(A)); lA = sparse(tril(A,-1)); p=1;
-    [L, D, shift] = lldl(lA, Adiag, p);
-    L = L + speye(size(L));  % Diagonal was left out of L.
+````matlab
+n = 6; m = 4; E = rand(m,n);
+A = [(n+m+1)*eye(n) E' ; E -(n+m+1)*eye(m)];
+Adiag = full(diag(A)); lA = sparse(tril(A,-1)); p=1;
+[L, D, shift] = lldl(lA, Adiag, p);
+L = L + speye(size(L));  % Diagonal was left out of L.
+````
 
 In practice it is more programmatically convenient to use the incomplete factors L and D as implicitly defining the preconditioner by bundling them into an abstract [SPOT](https://github.com/mpf/spot) operator:
 
-    LLDL = opLLDL(A, p);
-    x = LLDL * y;  % Solves the system L * |D| * L' x = y;
+````matlab
+LLDL = opLLDL(A, p);
+x = LLDL * y;  % Solves L |D| L' x = y;
+````
 
 ## Python Interface
 
-A Python interface is included as part of [NLPy](https://github.com/dpo/nlpy).
+A [Python](http://www.python.org) interface is included as part of [NLPy](https://github.com/dpo/nlpy).
+
+## Julia Interface
+
+A [Julia](http://www.julialang.org) is included in the
+[julia](https://github.com/optimizers/lldl/tree/master/julia) folder. You must
+have Julia installed. Due to [a bug in version
+0.2.1](https://github.com/JuliaLang/julia/issues/7818), you should install a
+more recent version. If you use [Homebrew](https://brew.sh)
+
+````bash
+brew install gcc
+brew tap staticfloat/julia
+brew tap homebrew/versions
+brew install julia --HEAD  # Add --64bit if desired.
+````
+
+Here is an example Julia session:
+
+````JULIA
+n = 10; m = 6; E = sprand(m, n, .2);
+A = [(n+m+1)*speye(n) E' ; E  -(n+m+1)*speye(m)];
+(L, d, shift) = lldl_mat(K, p);  # Returns L as a matrix, including unit diagonal
+(LLDL, shift) = lldl_op(K, p);   # Returns a linear operator
+x = LLDL * y;                    # Solves L |D| L' x = y;
+````
 
 ## Trouble / Questions / Bugs
 
