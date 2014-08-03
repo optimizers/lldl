@@ -85,7 +85,7 @@ A [Python](http://www.python.org) interface is included as part of [NLPy](https:
 
 ## Julia Interface
 
-A [Julia](http://www.julialang.org) is included in the
+A [Julia](http://www.julialang.org) interface is included in the
 [julia](https://github.com/optimizers/lldl/tree/master/julia) folder. You must
 have Julia installed. Due to [a bug in version
 0.2.1](https://github.com/JuliaLang/julia/issues/7818), you should install a
