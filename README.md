@@ -101,12 +101,14 @@ brew install julia --HEAD  # Add --64bit if desired.
 Here is an example Julia session:
 
 ````JULIA
-n = 10; m = 6; E = sprand(m, n, .2);
+n = 10; m = 6; E = sprand(m, n, .2); p = 1;
 A = [(n+m+1)*speye(n) E' ; E  -(n+m+1)*speye(m)];
-(L, d, shift) = lldl_mat(K, p);  # Returns L as a matrix, including unit diagonal
-(LLDL, shift) = lldl_op(K, p);   # Returns a linear operator
-x = LLDL * y;                    # Solves L |D| L' x = y;
+(L, d, shift) = lldl(K, p);     # Returns L as a matrix, not including unit diagonal
+(LLDL, shift) = lldl_op(K, p);  # Returns a linear operator
+x = LLDL * y;                   # Solves L |D| L' x = y;
 ````
+
+Run `lldl_test.jl` for another example.
 
 ## Trouble / Questions / Bugs
 
