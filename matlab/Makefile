@@ -4,18 +4,13 @@
 
 L_ARCH = $(ARCH)
 
-LIB_NAME = d-$(L_ARCH).a
-
-BLAS = ../src/blas/$(LIB_NAME)
+LIB_NAME = liblldl.dylib
 
 MINPACK2 = ../src/icf/$(LIB_NAME)
 
-LIBS = $(MINPACK2) $(BLAS)
+LIBS = $(MINPACK2)
 
-install: blas icf
-
-blas:
-	cd ../src/blas; make
+install: icf
 
 icf:
 	cd ../src/icf; make

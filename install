@@ -4,6 +4,7 @@ display_help() {
 	echo "`basename $0` [--help] [--skip-matlab-check]"
 	echo "The following environment variables may be set to influence"
 	echo "the behavior of the install procedure:"
+	echo "  PREFIX       install location"
 	echo "  CC           C compiler executable"
 	echo "  FC           Fortran compiler executable"
 	echo "  CFLAGS       C compiler flags"
@@ -28,14 +29,15 @@ do
 done
 
 # Compiler settings.
+[[ ${PREFIX+set} == 'set' ]] || export PREFIX=$top
 [[ ${ARCH+set} == 'set' ]] || export ARCH=osx
 [[ ${CC+set} == 'set' ]] || CC=gcc-4.3
-[[ ${CFLAGS+set} == 'set' ]] || CFLAGS='-g -fno-second-underscore -flat_namespace'
+[[ ${CFLAGS+set} == 'set' ]] || CFLAGS='-g -fPIC -fno-second-underscore -flat_namespace'
 [[ ${FC+set} == 'set' ]] || FC=gfortran-4.3
-[[ ${FFLAGS+set} == 'set' ]] || FFLAGS='-g -fno-second-underscore -flat_namespace -ffixed-form'
+[[ ${FFLAGS+set} == 'set' ]] || FFLAGS='-g -fPIC -fno-second-underscore -flat_namespace -ffixed-form -pedantic -Wall'
 
 # Build main library.
-make clean install CC="$CC" FC="$FC" CFLAGS="$CFLAGS" FFLAGS="$FFLAGS"
+make clean install PREFIX="$PREFIX" CC="$CC" FC="$FC" CFLAGS="$CFLAGS" FFLAGS="$FFLAGS"
 [[ $? != 0 ]] && exit $?
 
 # Build Matlab interface. MEX requires gcc/gfortran 4.3
