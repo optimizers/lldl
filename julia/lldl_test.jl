@@ -1,10 +1,14 @@
 include("lldl.jl")
 
-n = 6;
-m = 4;
+n = 10;
+m = 6;
 E = sprand(m, n, .2);
 K = [(n+m+1)*speye(n) E' ; E  -(n+m+1)*speye(m)];
-#=K = [(n+m+1)*eye(n) E' ; E  -(n+m+1)*zeros(m,m)];=#
-p = 1;
 
-(L, d, alpha) = lldl_mat(K, p);
+@printf("p  ‖LDL'-K‖  κ(P*K)\n");
+for p = 1 : 5
+  (L, d, alpha) = lldl_mat(K, p);
+  (P, alpha) = lldl_op(K, p);
+  @printf("%1d  %8.2e  %8.2e\n", p, norm(L*diagm(d)*L' - K), cond(full(P * K)));
+end
+
