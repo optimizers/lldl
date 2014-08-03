@@ -47,9 +47,8 @@ using linop
 
 function lldl_op(K :: SparseMatrixCSC, p :: Int)
   n = size(K, 1);
-  (l, lcolptr, lrowind, d, alpha) = lldl_base(K, p);
+  (Lmat, d, alpha) = lldl_mat(K, p);
   D = opDiagonal(1./abs(d));
-  Lmat = SparseMatrixCSC(n, n, lcolptr, lrowind, l);
-  L = opInverse(Lmat + speye(n));
-  return L' * D * L;
+  L = opInverse(Lmat);
+  return (L' * D * L, alpha);
 end
