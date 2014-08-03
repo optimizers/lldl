@@ -36,10 +36,10 @@ function lldl_base(K :: SparseMatrixCSC, p :: Int)
   return (l, lcolptr, lrowind, d, alpha[1]);
 end
 
-function lldl_mat(K :: SparseMatrixCSC, p :: Int)
+function lldl(K :: SparseMatrixCSC, p :: Int)
   n = size(K, 1);
   (l, lcolptr, lrowind, d, alpha) = lldl_base(K, p);
-  L = SparseMatrixCSC(n, n, lcolptr, lrowind, l) + speye(n);
+  L = SparseMatrixCSC(n, n, lcolptr, lrowind, l);
   return (L, d, alpha);
 end
 
@@ -47,8 +47,8 @@ using linop
 
 function lldl_op(K :: SparseMatrixCSC, p :: Int)
   n = size(K, 1);
-  (Lmat, d, alpha) = lldl_mat(K, p);
+  (Lmat, d, alpha) = lldl(K, p);
   D = opDiagonal(1./abs(d));
-  L = opInverse(Lmat);
+  L = opInverse(Lmat + speye(n));
   return (L' * D * L, alpha);
 end
