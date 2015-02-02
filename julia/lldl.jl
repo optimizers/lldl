@@ -43,7 +43,7 @@ function lldl(K :: SparseMatrixCSC, p :: Int)
   return (L, d, alpha);
 end
 
-using linop
+using LinearOperators
 
 function lldl_op(K :: SparseMatrixCSC, p :: Int)
   n = size(K, 1);
