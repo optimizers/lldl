@@ -9,7 +9,7 @@ display_help() {
 	echo "  FC           Fortran compiler executable"
 	echo "  CFLAGS       C compiler flags"
 	echo "  FFLAGS       Fortran compiler flags"
-	echo "  MATLABPATH   Path to Matlab's bin and extern subdirs"
+	echo "  MATLABDIR    Path to Matlab's bin and extern subdirs"
 }
 
 top=$PWD
