@@ -14,6 +14,12 @@ The calling syntax :
 #include "mex.h"
 #include "matrix.h"
 
+void dpcg_(int*,
+           double*, double*, int*, int*,
+           double*, double*, int*, int*,
+           double*, double*, int*, double*, int*, int*,
+           double*, double*, double*, double*);
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
    /* Right hand side */
