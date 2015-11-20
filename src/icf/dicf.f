@@ -203,7 +203,7 @@ c        Compute the j-th column of L.
 
 c           Update the diagonal elements.
 c           Variant I.
-            diag(indr(k)) = diag(indr(k)) - diag(j) * w(indr(k))**2
+c           diag(indr(k)) = diag(indr(k)) - diag(j) * w(indr(k))**2
          end do
 
 c        Set mlj to the number of nonzeros to be retained.
@@ -244,9 +244,9 @@ c        Update the diagonal elements.
 c        Variant II.
 c        Lin and More report that this variant performs better.
 
-C          do k = kth, nlj
-C             diag(indr(k)) = diag(indr(k)) - diag(j) * w(indr(k))**2
-C          end do
+          do k = kth, nlj
+             diag(indr(k)) = diag(indr(k)) - diag(j) * w(indr(k))**2
+          end do
 
 c        Update indf and list for the j-th column.
 
