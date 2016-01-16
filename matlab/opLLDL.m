@@ -171,7 +171,7 @@ classdef opLLDL < opSpot
       % multiply
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-      function y = multiply(op, x, mode)
+      function y = multiply(op, x, ~)
          y = op.L' * op.D * op.L * x;
       end % function multiply
 
