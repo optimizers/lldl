@@ -64,6 +64,7 @@ classdef opLLDL < opSpot
       Dinv          % "Inverse" diagonal incomplete factor (for normest)
       nnz           % Number of nonzeros in L
       p             % Limited-memory factor
+      droptol       % Drop tolerance
       shift         % The shift necessary to complete the factorization
       growth        % Growth factor max(max |L|, max |D|) / max |K|
       minpivot      % Smallest pivot in absolute value
@@ -88,6 +89,8 @@ classdef opLLDL < opSpot
          end
          indef = false;
          fill_factor = false;
+         minpiv = 0.0;
+         droptol = 0.0;
          if exist('opts', 'var')
             if isfield(opts, 'indef')
                if islogical(opts.indef)
@@ -97,6 +100,16 @@ classdef opLLDL < opSpot
             if isfield(opts, 'fill_factor')
                if islogical(opts.fill_factor)
                   fill_factor = opts.fill_factor;
+               end
+            end
+            if isfield(opts, 'minpiv')
+               if isscalar(opts.minpiv)
+                  minpiv = opts.minpiv;
+               end
+            end
+            if isfield(opts, 'droptol')
+               if isscalar(opts.droptol)
+                  droptol = opts.droptol;
                end
             end
          end
@@ -112,6 +125,7 @@ classdef opLLDL < opSpot
          op = op@opSpot('LLDL', n, n);
          op.cflag   = false;
          op.indef   = indef;
+         op.droptol = droptol;
 
          % If opts.fill_factor, p specifies the fill factor instead of
          % the absolute additional memory.
@@ -125,7 +139,7 @@ classdef opLLDL < opSpot
          else
            op.p = max(p, 0);
          end
-         [L, D, op.shift] = lldl(sparse(T), full(diag(K)), op.p, shift);
+         [L, D, op.shift] = lldl(sparse(T), full(diag(K)), op.p, op.droptol, minpiv, shift);
          absD             = abs(D);
          op.nnz           = nnz(L);
 

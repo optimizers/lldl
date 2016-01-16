@@ -142,7 +142,7 @@ c           Compute the preconditioner L.
                alpha = 0.0d0
                call dicfs(n,nnz,a,adiag,acol_ptr,arow_ind,
      +                    l,d,lcol_ptr,lrow_ind,
-     +                    p(j),alpha,iw,w,w(n+1))
+     +                    p(j),alpha,0.0d0,0.0d0,iw,w,w(n+1))
                do i = 1, n
                   if (d(i) .lt. 0) d(i) = -d(i)
                end do
@@ -208,4 +208,3 @@ c           Compute relative error and function value.
      +        1x,'Time for icf and pcg                    ',3x,d10.3/)
 
       end
-

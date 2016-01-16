@@ -1,11 +1,11 @@
       subroutine dicfs(n,nnz,a,adiag,acol_ptr,arow_ind,
      +                 l,d,lcol_ptr,lrow_ind,
-     +                 p,alpha,iwa,wa1,wa2)
+     +                 p,alpha,droptol,minpiv,iwa,wa1,wa2)
       integer n, nnz, p
       integer acol_ptr(n+1), arow_ind(nnz)
       integer lcol_ptr(n+1), lrow_ind(nnz+n*p)
       integer iwa(3*n)
-      double precision alpha
+      double precision alpha, minpiv, droptol
       double precision wa1(n), wa2(n)
       double precision a(nnz), adiag(n), l(nnz+n*p), d(n)
 c     *********
@@ -85,6 +85,18 @@ c       alpha is a double precision variable.
 c         On entry alpha is the initial guess of the shift.
 c         On exit alpha is final shift
 c
+c       minpiv is a double precision variable.
+c         On entry minpiv is the minimum allowed pivot magnitude.
+c           If a pivot of magnitude smaller than minpiv is generated,
+c           the shift will be increased and a new factorization will
+c           be attempted.
+c         On exit minpiv is unchanged.
+c
+c       droptol is a double precision variable.
+c         On entry droptol is the drop tolerance. Any entry in L
+c           with magnitude inferior to droptol will be discarded.
+c         On exit droptol is unchanged.
+c
 c       iwa is an integer work array of dimesnion 3*n.
 c
 c       wa1 is a double precision work array of dimension n.
@@ -149,6 +161,11 @@ c     Compute the initial shift.
          end if
       end do
 
+c     Check values of minpiv and droptol.
+
+      if (minpiv .lt. zero) minpiv = zero
+      if (droptol .lt. zero) droptol = zero
+
 c     Search for an acceptable shift. During the search we decrease
 c     the lower bound alphas until we determine a lower bound that
 c     is not acceptable. We then increase the shift.
@@ -184,7 +201,7 @@ c     Scale A and store in the lower triangular matrix L.
 
 c     Attempt an incomplete factorization.
 
-         call dicf(n,nnz,l,d,lcol_ptr,lrow_ind,p,info,
+         call dicf(n,nnz,l,d,lcol_ptr,lrow_ind,p,droptol,minpiv,info,
      +             iwa(1),iwa(n+1),iwa(2*n+1),wa1)
 
 c        If the factorization exists, then test for termination.

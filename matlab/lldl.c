@@ -34,7 +34,8 @@ extern "C" {
   void dicfs_(int *n, int *nnz,
               double *a, double *adiag, int *acol_ptr, int *arow_ind,
               double *l, double *ldiag, int *lcol_ptr, int *lrow_ind,
-              int *p, double *alpha, int *iw, double *w1, double *w2);
+              int *p, double *alpha, double *droptol, double *minpiv,
+              int *iw, double *w1, double *w2);
   void quicksort_icfs(int numbers[], double values[], int low, int up);
   void print_int_array(const char *name, int *array, int len,
                        const char *fmt);
@@ -47,7 +48,7 @@ extern "C" {
       int n = 0, p = 0;
       double *a = NULL, *l = NULL;
       double *adiag = NULL, *ldiag = NULL;
-      double alpha = 0;
+      double alpha = 0.0, minpiv = 0.0, droptol = 0.0;
       mwIndex *acol_ptr = NULL, *arow_ind = NULL;
       int *acol_ptr_int = NULL, *arow_ind_int = NULL;
       mwIndex *lcol_ptr = NULL, *lrow_ind = NULL;
@@ -114,10 +115,17 @@ extern "C" {
       p = (int)mxGetScalar(prhs[2]);
 
       if (nrhs > 3)
-        alpha = (double)mxGetScalar(prhs[3]);
+         droptol = (double)mxGetScalar(prhs[3]);
+
+      if (nrhs > 4)
+         minpiv = (double)mxGetScalar(prhs[4]);
+
+      if (nrhs > 5)
+        alpha = (double)mxGetScalar(prhs[5]);
 
   #ifdef MXDEBUG
-      mexPrintf("Calling lldl with n=%d, nnz=%d, p=%d\n", n, nnz, p);
+      mexPrintf("Calling lldl with n=%d, nnz=%d, p=%d, minpiv=%8.1e, droptol=%8.1e, alpha=%8.1e\n",
+                n, nnz, p, minpiv, droptol, alpha);
       mexPrintf("Copying arrays...\n");
   #endif
 
@@ -180,7 +188,7 @@ extern "C" {
       dicfs_(&n, &nnz,
              a, adiag, acol_ptr_int, arow_ind_int,
    	         l, ldiag, lcol_ptr_int, lrow_ind_int,
-             &p, &alpha, iw, w1, w2);
+             &p, &alpha, &droptol, &minpiv, iw, w1, w2);
 
       int nnzl = lcol_ptr_int[n] - 1;  /* -1 accounts for 1-based indexing */
 

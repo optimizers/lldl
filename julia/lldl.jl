@@ -8,7 +8,7 @@ macro lldl_call(args...)
   end
 end
 
-function lldl_base(K :: SparseMatrixCSC, p :: Int)
+function lldl_base(K :: SparseMatrixCSC, p :: Int; droptol :: Float64=0.0, minpiv :: Float64=0.0)
   n = size(K, 1);
   adiag = diag(K);
   A = sparse(tril(K, -1));
@@ -24,30 +24,34 @@ function lldl_base(K :: SparseMatrixCSC, p :: Int)
   wa1 = zeros(Float64, n, 1);
   wa2 = zeros(Float64, n, 1);
 
+  @printf("droptol=%8.1e, minpiv=%8.1e\n", droptol, minpiv)
+
   @lldl_call((Ptr{Int32},   Ptr{Int32},
-              Ptr{Float64}, Ptr{Float64}, Ptr{Int32}, Ptr{Int32},
-              Ptr{Float64}, Ptr{Float64}, Ptr{Int32}, Ptr{Int32},
-              Ptr{Int32},   Ptr{Float64}, Ptr{Int32}, Ptr{Float64}, Ptr{Float64}),
+              Ptr{Float64}, Ptr{Float64}, Ptr{Int32},   Ptr{Int32},
+              Ptr{Float64}, Ptr{Float64}, Ptr{Int32},   Ptr{Int32},
+              Ptr{Int32},   Ptr{Float64}, Ptr{Float64}, Ptr{Float64},
+              Ptr{Int32},   Ptr{Float64}, Ptr{Float64}),
               &n, &nnzA,
               A.nzval, adiag, convert(Array{Int32, 1}, A.colptr), convert(Array{Int32, 1}, A.rowval),
               l, d, lcolptr, lrowind,
-              &p, alpha, iwa, wa1, wa2);
+              &p, alpha, &droptol, &minpiv,
+              iwa, wa1, wa2);
 
   return (l, lcolptr, lrowind, d, alpha[1]);
 end
 
-function lldl(K :: SparseMatrixCSC, p :: Int)
+function lldl(K :: SparseMatrixCSC, p :: Int; droptol :: Float64=0.0, minpiv :: Float64=0.0)
   n = size(K, 1);
-  (l, lcolptr, lrowind, d, alpha) = lldl_base(K, p);
+  (l, lcolptr, lrowind, d, alpha) = lldl_base(K, p, droptol=droptol, minpiv=minpiv);
   L = SparseMatrixCSC(n, n, lcolptr, lrowind, l);
   return (L, d, alpha);
 end
 
 using LinearOperators
 
-function lldl_op(K :: SparseMatrixCSC, p :: Int)
+function lldl_op(K :: SparseMatrixCSC, p :: Int; droptol :: Float64=0.0, minpiv :: Float64=0.0)
   n = size(K, 1);
-  (Lmat, d, alpha) = lldl(K, p);
+  (Lmat, d, alpha) = lldl(K, p, droptol=droptol, minpiv=minpiv);
   D = opDiagonal(1./abs(d));
   L = opInverse(Lmat + speye(n));
   return (L' * D * L, alpha);

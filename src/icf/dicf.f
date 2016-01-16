@@ -1,10 +1,11 @@
-      subroutine dicf(n,nnz,a,diag,col_ptr,row_ind,p,info,
-     +                indr,indf,list,w)
+      subroutine dicf(n,nnz,a,diag,col_ptr,row_ind,p,droptol,minpiv,
+     +                info,indr,indf,list,w)
       integer n, nnz, p, info
       integer col_ptr(n+1), row_ind(*)
       integer indr(n), indf(n), list(n)
       double precision a(*), diag(n)
       double precision w(n)
+      double precision minpiv, droptol
 c     *********
 c
 c     A modification of Lin and More's original ICFS to produce a LDL'
@@ -85,6 +86,18 @@ c         On entry info need not be specified.
 c         On exit info = 0 if the factorization succeeds, and
 c            info < 0 if the -info pivot is not positive.
 c
+c       minpiv is a double precision variable.
+c         On entry minpiv is the minimum allowed pivot magnitude.
+c           If a pivot of magnitude smaller than minpiv is generated,
+c           the shift will be increased and a new factorization will
+c           be attempted.
+c         On exit minpiv is unchanged.
+c
+c       droptol is a double precision variable.
+c         On entry droptol is the drop tolerance. Any entry in L
+c           with magnitude inferior to droptol will be discarded.
+c         On exit droptol is unchanged.
+c
 c       indr is an integer work array of dimension n.
 c
 c       indf is an integer work array of dimension n.
@@ -109,7 +122,7 @@ c     **********
       double precision zero
       parameter (zero=0.0d0)
 
-      integer i, ip, j, k, kth, nlj, newk, np, mlj
+      integer i, ip, j, k, kth, l, nlj, newk, np, mlj
       integer isj, iej, isk, iek, newisj, newiej
       double precision lval
 
@@ -153,7 +166,7 @@ c        of the j-th column of A are a(isj) and a(iej).
 
 c        Exit if the current pivot is zero.
 
-         if (diag(j) .eq. zero) then
+         if (abs(diag(j)) .lt. minpiv) then
             info = -j
             return
          end if
@@ -237,10 +250,16 @@ c        of the j-th column of L are a(newisj) and a(newiej).
 
          newisj = col_ptr(j)
          newiej = newisj + mlj - 1
+         l = newisj
          do k = newisj, newiej
-            a(k) = w(indr(k-newisj+kth))
-            row_ind(k) = indr(k-newisj+kth)
+            val = w(indr(k-newisj+kth))
+            if (abs(val) .gt. droptol) then
+              a(l) = val
+              row_ind(l) = indr(k-newisj+kth)
+              l = l + 1
+            end if
          end do
+         newiej = l - 1
 
 c        Update the diagonal elements.
 c        Variant II.
@@ -274,4 +293,3 @@ c        Update isj and col_ptr.
       return
 
       end
-
