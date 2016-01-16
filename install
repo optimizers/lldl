@@ -31,9 +31,9 @@ done
 # Compiler settings.
 [[ ${PREFIX+set} == 'set' ]] || export PREFIX=$top
 [[ ${ARCH+set} == 'set' ]] || export ARCH=osx
-[[ ${CC+set} == 'set' ]] || CC=gcc-4.3
+[[ ${CC+set} == 'set' ]] || CC=gcc
 [[ ${CFLAGS+set} == 'set' ]] || CFLAGS='-g -fPIC -fno-second-underscore -flat_namespace'
-[[ ${FC+set} == 'set' ]] || FC=gfortran-4.3
+[[ ${FC+set} == 'set' ]] || FC=gfortran
 [[ ${FFLAGS+set} == 'set' ]] || FFLAGS='-g -fPIC -fno-second-underscore -flat_namespace -ffixed-form -pedantic -Wall'
 
 # Build main library.
