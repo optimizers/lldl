@@ -13,10 +13,10 @@ c
 c     Subroutine dicfs
 c
 c     Given a symmetric matrix A in compressed column storage, this
-c     subroutine computes an incomplete LDL factorization of A + alpha * D
-c     where alpha > 0 is a shift and D is a diagonal matrix whose entries are
-c     the 2-norm of the columns of A multiplied by the sign of the diagonal
-c     element of A.
+c     subroutine computes an incomplete LDL factorization of A + alpha*D
+c     where alpha > 0 is a shift and D is a diagonal matrix whose
+c     entries are the 2-norm of the columns of A multiplied by the sign
+c     of the diagonal element of A.
 c     dominique.orban@gerad.ca based on Lin and More's original ICFS.
 c
 c     The subroutine statement is

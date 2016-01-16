@@ -7,13 +7,15 @@
       double precision w(n)
 c     *********
 c
-c     A modification of Lin and More's original ICFS to produce a LDL' factorization.
+c     A modification of Lin and More's original ICFS to produce a LDL'
+c     factorization.
 c     dominique.orban@gerad.ca
 c
 c     Subroutine dicf
 c
 c     Given a sparse symmetric quasi-definite matrix A in compressed
-c     row storage, this subroutine computes an incomplete LDL' factorization.
+c     row storage, this subroutine computes an incomplete LDL'
+c     factorization.
 c
 c     This code is a modification of More and Lin's ICFS.
 c
