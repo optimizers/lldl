@@ -13,18 +13,28 @@ classdef opLLDL < opSpot
 %   definiteness pattern as K. The default value of shift is zero.
 %
 %   Options may be set by passing a structure as last argument:
-%   opLLDL(K,p,shift,opts) where
-%     opts.indef = whether the operator is allowed to be indefinite (true)
-%                  or not (false). If set to `true`, the diagonal D
-%                  resulting from the factorization is used as is when
-%                  applying the preconditioner. If set to `false`, then
-%                  |D| is used.
+%   opLLDL(K, p, shift, opts) where
+%
+%     opts.indef: whether the operator is allowed to be indefinite (`true`)
+%          or not (`false`). If set to `true`, the diagonal D resulting from
+%          the factorization is used as is when applying the preconditioner.
+%          If set to `false`, then |D| is used. By default, `indef=false`.
+%
 %     opts.fill_factor = whether the argument `p` should be interpreted
-%                        as an additive (nnz + p*n) or multiplicative
-%                        (p * nnz) memory specification. In the latter
-%                        case (`opts.fill_factor = true`), an equivalent
-%                        additive value of p is computed to perform the
-%                        factorization.
+%          as an additive (nnz + p*n) or multiplicative (p * nnz) memory
+%          specification. In the latter case (`opts.fill_factor = true`),
+%          an equivalent additive value of `p` is computed to perform the
+%          factorization. This option facilitates comparisons with other
+%          incomplete factorizations with multiplicative memory specification.
+%          By default, `fill_factor=false`.
+%
+%     opts.minpiv: pivot tolerance. If a pivot smaller than `minpiv` in
+%          absolute value is generated during the factorization, the shift
+%          is increased and the factorization restarted. By default, `minpiv=0`.
+%
+%     opts.droptol: drop tolerance. If nonzeros smaller than the drop tolerance
+%          in absolute value are generated during the factorization, they are
+%          discarded. By default, `droptol=0`.
 %
 %   Note that K is an explicit matrix. The public properties are:
 %
